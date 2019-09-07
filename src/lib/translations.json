@@ -1,0 +1,20 @@
+{
+  "data": [
+    {
+      "key": "questionnaire/header",
+      "value": "Sie haben {userAnswerCount} von {questionCount} Fragen beantwortet."
+    },
+    {
+      "key": "questionnaire/invalid",
+      "value": "Bitte beantworten Sie mindestens eine Frage."
+    },
+    {
+      "key": "questionnaire/submit",
+      "value": "Abschicken"
+    },
+    {
+      "key": "questionnaire/cancel",
+      "value": "Abbrechen"
+    }
+  ]
+}
