@@ -19,7 +19,7 @@ import { Chart, ChartTitle } from '@project-r/styleguide/chart'
 
 import Question from './Question'
 
-const { Headline, P, H2 } = Interaction
+const { P, H2 } = Interaction
 
 const styles = {
   count: css({
@@ -112,20 +112,24 @@ class Page extends Component {
         }
 
         // handle questions
-        const { questionnaire: { questions } } = data
+        const { questionnaire } = data
+        const { questions, userHasSubmitted } = questionnaire
+
         const { error, submitting, updating } = this.state
         const questionCount = questions.filter(Boolean).length
         const userAnswerCount = questions.map(q => q.userAnswer).filter(Boolean).length
 
         return (
           <div>
-            <Headline>Mainstream-Score</Headline>
             <div {...styles.count}>
               { error
                 ? <P {...styles.error}>{errorToString(error)}</P>
                 : <>
                   <div style={{ display: 'flex' }}>
-                    <P {...styles.strong}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
+                    { userHasSubmitted
+                      ? <P>Sie haben den Fragebogen bereits abgeschlossen.</P>
+                      : <P {...styles.strong}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
+                    }
                     {
                       questionCount === userAnswerCount
                         ? <div {...styles.progressIcon}><CheckCircle size={22} color={colors.primary} /></div>
@@ -139,12 +143,13 @@ class Page extends Component {
             </div>
             {
               questions
-                .slice(0, userAnswerCount + 1)
+                .slice(0, userHasSubmitted ? questionCount : userAnswerCount + 1)
                 .map(q =>
                   React.createElement(
                     Question,
                     {
                       onChange: this.createHandleChange(q.id),
+                      questionnaire,
                       question: q,
                       key: q.id
                     }

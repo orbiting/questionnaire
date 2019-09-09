@@ -59,7 +59,7 @@ class ChoiceQuestion extends Component {
   render () {
 
     this.handleChange = (value) => {
-      const { onChange, question: { userAnswer, cardinality } } = this.props
+      const { onChange, questionnaire, question: { userAnswer, cardinality } } = this.props
       const nextValue = new Set(userAnswer ? userAnswer.payload.value : [])
 
       if (cardinality === 0 || cardinality > 1) {
@@ -78,7 +78,8 @@ class ChoiceQuestion extends Component {
       onChange(answerId, Array.from(nextValue))
     }
 
-    const { question: { id, text, userAnswer, options, results } } = this.props
+    const { questionnaire, question: { id, text, userAnswer, options, results } } = this.props
+	  const { userHasSubmitted } = questionnaire
 
     const optionsWithResult = options.map(o => ({
       ...o,
@@ -98,9 +99,6 @@ class ChoiceQuestion extends Component {
     const getBarColor = ({ value }) => 'black'
     // value === 'true' ? colors.discrete[2] : colors.discrete[3]
 
-    const getOpacity = ({ value }) =>
-      value == userAnswer.payload.value ? 1.0 : 0.4
-
     return (
       <div>
         <div {...styles.label}>
@@ -111,15 +109,15 @@ class ChoiceQuestion extends Component {
         <div {...styles.body} style={{ minHeight: '80px' }}>
           { optionsWithResult.map(option =>
             <div {...styles.option} key={`${id}-${option.value}`}>
-              { !userAnswer &&
+              { !userAnswer && !userHasSubmitted &&
                 <Button
                   onClick={() => this.handleChange(option.value)}
                 >
                   {option.label}
                 </Button>
               }
-              { userAnswer &&
-                <div style={{ width: '100%', opacity: getOpacity(option) }}>
+              { (userAnswer || userHasSubmitted) &&
+                <div style={{ width: '100%' }}>
                   <div {...styles.resultBars}>
                     <div {...styles.resultBar} style={{
                       backgroundColor: getBarColor(option),
@@ -134,7 +132,7 @@ class ChoiceQuestion extends Component {
                     {option.label}<br />
                     {option.result.count}<br />
                     {`${Math.round(100 / numSubmitted * option.result.count)}%`}<br />
-                    {option.value == userAnswer.payload.value ? 'Ihre Antwort!' : ''}
+                    {userAnswer && option.value == userAnswer.payload.value ? 'Ihre Antwort!' : ''}
                   </div>
                 </div>
               }
