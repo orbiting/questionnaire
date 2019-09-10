@@ -86,11 +86,11 @@ class Page extends Component {
         })
     }
 
-    this.createHandleChange = (questionId) => (answerId, value) => {
+    this.createHandleChange = (question) => (answerId, value) => {
       const payload = value !== null ? { value } : null
       this.processSubmit(
         this.props.submitAnswer,
-        questionId, payload, answerId
+        question, payload, answerId
       )
     }
 
@@ -132,7 +132,7 @@ class Page extends Component {
                   React.createElement(
                     Question,
                     {
-                      onChange: this.createHandleChange(q.id),
+                      onChange: this.createHandleChange(q),
                       questionnaire,
                       question: q,
                       key: q.id
@@ -275,44 +275,35 @@ export default compose(
   withMe,
   graphql(submitAnswerMutation, {
     props: ({ mutate, ownProps: { slug } }) => ({
-      submitAnswer: (questionId, payload, answerId) => {
+      submitAnswer: (question, payload, answerId) => {
         return mutate({
           variables: {
             answerId,
-            questionId,
+            questionId: question.id,
             payload
           },
           optimisticResponse: {
             __typename: 'Mutation',
             submitAnswer: {
-              __typename: 'QuestionInterface',
-              id: questionId,
+              __typename: 'QuestionTypeChoice',
+              id: question.id,
               userAnswer: {
                 __typename: 'Answer',
                 id: answerId,
                 payload
+              },
+              results: question.results.map(r => ({
+                ...r,
+                count: r.count + (r.option.value === payload.value
+                  ? 1
+                  : 0
+                )
+              })),
+              turnout: {
+                ...question.turnout,
+                submitted: question.turnout.submitted + 1
               }
             }
-          },
-          update: (proxy, { data: { submitAnswer } }) => {
-            const queryObj = { query, variables: { slug } }
-            const data = proxy.readQuery(queryObj)
-
-            const questionIx = data.questionnaire.questions.findIndex(q => q.id === questionId)
-            const question = data.questionnaire.questions[questionIx]
-            question.userAnswer = submitAnswer.userAnswer
-
-            if (question.results) {
-              const result = question.results.find( r =>
-                r.option.value == submitAnswer.userAnswer.payload.value[0]
-              )
-              result.count++
-            }
-            if (question.turnout) {
-              question.turnout.submitted++
-            }
-
-            proxy.writeQuery({ ...queryObj, data })
           }
         })
       }
