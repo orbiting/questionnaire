@@ -35,16 +35,11 @@ const styles = {
     background: '#fff',
     zIndex: 10,
     borderTop: `0.5px solid ${colors.divider}`,
-    minHeight: 25,
-    //position: 'sticky',
-    //bottom: 0,
-    //[mediaQueries.onlyS]: {
-    //  bottom: 0
-    //}
+    minHeight: 25
   }),
   footer: css({
     ...fontStyles.sansSerifRegular18,
-    margin: 10
+    margin: '10px 0'
   }),
   error: css({
     color: colors.error,
@@ -79,7 +74,7 @@ class Page extends Component {
         .then(() =>
           this.setState(() => ({
             updating: false,
-            error: null
+            error: null,
           }))
         )
         .catch((error) => {
@@ -159,7 +154,7 @@ class Page extends Component {
                 }
               </div>
               { !userHasSubmitted &&
-                <P {...styles.footer} style={{ marginTop: 0 }}><A onClick={() => {this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten löschen?</A></P>
+                <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={() => {this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten löschen?</A></P>
               }
               { showOverlay &&
                 <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
@@ -171,7 +166,14 @@ class Page extends Component {
                     <P>
                       Möchten Sie Ihre Antworten wirklich löschen? Wir können Ihnen danach nicht mehr anzeigen was Sie geantwortet haben und Sie können keine Antworten mehr abgeben.
                     </P>
-                    <Button onClick={() => this.setState({ showOverlay: false})} >
+                    <Button style={{ marginTop: 10 }} onClick={(e) => {
+                      e.preventDefault()
+                      this.processSubmit(
+                        this.props.anonymizeUserAnswers,
+                        questionnaire.id
+                      )
+                      this.setState({ showOverlay: false })
+                    }} >
                       Löschen
                     </Button>
                   </OverlayBody>
@@ -213,6 +215,18 @@ mutation submitAnswer($answerId: ID!, $questionId: ID!, $payload: JSON) {
   }
 }
 `
+
+const anonymizeUserAnswersMutation = gql`
+mutation anonymizeUserAnswers($questionnaireId: ID!) {
+  anonymizeUserAnswers(
+    questionnaireId: $questionnaireId
+  ) {
+    id
+    userHasSubmitted
+  }
+}
+`
+
 
 const query = gql`
 query getQuestionnaire($slug: String!) {
@@ -300,6 +314,18 @@ export default compose(
 
             proxy.writeQuery({ ...queryObj, data })
           }
+        })
+      }
+    })
+  }),
+  graphql(anonymizeUserAnswersMutation, {
+    props: ({ mutate, ownProps: { slug } }) => ({
+      anonymizeUserAnswers: (questionnaireId) => {
+        return mutate({
+          variables: {
+            questionnaireId,
+          },
+          refetchQueries: [{ query, variables: { slug } }]
         })
       }
     })
