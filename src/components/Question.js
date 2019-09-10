@@ -11,33 +11,27 @@ import {
 } from '@project-r/styleguide'
 const { H2, H3, P } = Interaction
 import withT from '../lib/withT'
+import Chart from './Chart'
 
 const styles = {
-  body: css({
-    margin: '5px 0 10px 0',
-    display: 'flex',
-    width: '100%',
-    textAlign: 'center'
-  }),
-  label: css({
+  container: css({
     margin: '50px 0 10px 0'
   }),
-  option: css({
-    width: '50%',
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'center'
+  question: css({
+    margin: '0px 0 10px 0',
   }),
-  resultBars: css({
-    position: 'relative',
+  content: css({
     width: '100%',
-    height: '50px'
+    height: 80,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
   }),
-  resultBar: css({
-    position: 'absolute',
-    bottom: 0,
-    height: '100%'
-  })
+  buttons: css({
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-evenly',
+  }),
 }
 
 
@@ -72,65 +66,27 @@ class ChoiceQuestion extends Component {
     }
 
     const { questionnaire, question: { id, text, userAnswer, options, results } } = this.props
+    const { question } = this.props
 	  const { userHasSubmitted } = questionnaire
 
-    const optionsWithResult = options.map(o => ({
-      ...o,
-      result: results.find(r => r.option.value === o.value)
-    }))
-
-    const numSubmitted = optionsWithResult.reduce(
-      (agg, o) => o.result ? o.result.count + agg : agg,
-      0
-    )
-
-    const getBarWidth = (option) =>
-      numSubmitted > 0
-        ? `${Math.max(100 / numSubmitted * option.result.count, 1)}%`
-        : 1
-
-    const getBarColor = ({ value }) => 'black'
-    // value === 'true' ? colors.discrete[2] : colors.discrete[3]
-
     return (
-      <div>
-        <div {...styles.label}>
-          { text &&
-          <H3>{text}</H3>
+      <div {...styles.container}>
+        <H3 {...styles.question}>{text}</H3>
+        <div {...styles.content}>
+          { (userAnswer || userHasSubmitted) &&
+            <Chart question={question} />
           }
-        </div>
-        <div {...styles.body} style={{ minHeight: '80px' }}>
-          { optionsWithResult.map(option =>
-            <div {...styles.option} key={`${id}-${option.value}`}>
-              { !userAnswer && !userHasSubmitted &&
-                <Button
-                  onClick={() => this.handleChange(option.value)}
-                >
-                  {option.label}
-                </Button>
-              }
-              { (userAnswer || userHasSubmitted) &&
-                <div style={{ width: '100%' }}>
-                  <div {...styles.resultBars}>
-                    <div {...styles.resultBar} style={{
-                      backgroundColor: getBarColor(option),
-                      width: getBarWidth(option),
-                      ...(option.value === 'true') ? { right: 0 } : { left: 0 }
-                    }} />
-                  </div>
-                  <div style={{
-                    textAlign: option.value === 'true' ? 'right' : 'left',
-                    margin: '5px'
-                  }}>
-                    {option.label}<br />
-                    {option.result.count}<br />
-                    {`${Math.round(100 / numSubmitted * option.result.count)}%`}<br />
-                    {userAnswer && option.value == userAnswer.payload.value ? 'Ihre Antwort!' : ''}
-                  </div>
+          { (!userAnswer && !userHasSubmitted) &&
+            <div {...styles.buttons}>
+              { options.map(option =>
+                <div key={`${id}-${option.value}`}>
+                  <Button onClick={() => this.handleChange(option.value)} >
+                    {option.label}
+                  </Button>
                 </div>
-              }
+              )}
             </div>
-          )}
+          }
         </div>
       </div>
     )

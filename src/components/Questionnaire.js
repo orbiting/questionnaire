@@ -15,7 +15,6 @@ import {
   fontFamilies,
   Loader
 } from '@project-r/styleguide'
-import { Chart, ChartTitle } from '@project-r/styleguide/chart'
 
 import Question from './Question'
 
@@ -101,7 +100,7 @@ class Page extends Component {
     return (
       <Loader loading={data.loading} error={data.error} render={() => {
         const now = new Date()
-        console.log({data})
+
         // handle not found or not started
         if (!data.questionnaire || new Date(data.questionnaire.beginDate) > now) {
           return (
