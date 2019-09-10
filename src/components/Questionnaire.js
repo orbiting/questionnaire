@@ -13,46 +13,34 @@ import {
   mediaQueries,
   InlineSpinner,
   fontFamilies,
-  Loader
+  Loader,
+  Editorial
 } from '@project-r/styleguide'
 
 import Question from './Question'
 
-const { P, H2 } = Interaction
+const { P } = Interaction
+const { Note } = Editorial
 
 const styles = {
   count: css({
     background: '#fff',
     zIndex: 10,
-    position: 'sticky',
-    padding: '10px 0',
-    borderBottom: `0.5px solid ${colors.divider}`,
-    minHeight: 55,
-    top: 0,
-    [mediaQueries.onlyS]: {
-      top: 0
-    }
-  }),
-  reset: css({
-    textAlign: 'center',
-    marginTop: 10
+    borderTop: `0.5px solid ${colors.divider}`,
+    minHeight: 25,
+    //position: 'sticky',
+    //bottom: 0,
+    //[mediaQueries.onlyS]: {
+    //  bottom: 0
+    //}
   }),
   strong: css({
-    fontFamily: fontFamilies.sansSerifMedium
+    fontFamily: fontFamilies.sansSerifMedium,
+    margin: 10
   }),
   error: css({
     color: colors.error,
     fontFamily: fontFamilies.sansSerifMedium
-  }),
-  closed: css({
-    marginTop: 35,
-    background: colors.primaryBg,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 30,
-    textAlign: 'center',
-    marginBottom: 30
   }),
   progressIcon: css({
     marginLeft: 5,
@@ -120,30 +108,10 @@ class Page extends Component {
 
         return (
           <div>
-            <div {...styles.count}>
-              { error
-                ? <P {...styles.error}>{errorToString(error)}</P>
-                : <>
-                  <div style={{ display: 'flex' }}>
-                    { userHasSubmitted
-                      ? <P>Sie haben den Fragebogen bereits abgeschlossen.</P>
-                      : <P {...styles.strong}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
-                    }
-                    {
-                      questionCount === userAnswerCount
-                        ? <div {...styles.progressIcon}><CheckCircle size={22} color={colors.primary} /></div>
-                        : (updating || submitting)
-                          ? <div style={{ marginLeft: 5, marginTop: 3 }}><InlineSpinner size={24} /></div>
-                          : null
-                    }
-                  </div>
-                </>
-              }
-            </div>
             {
               questions
-                .slice(0, userHasSubmitted ? questionCount : userAnswerCount + 1)
-                .map(q =>
+              //.slice(0, userHasSubmitted ? questionCount : userAnswerCount + 1)
+              .map(q =>
                   React.createElement(
                     Question,
                     {
@@ -153,8 +121,28 @@ class Page extends Component {
                       key: q.id
                     }
                   )
-                )
+              )
             }
+            <div {...styles.count}>
+              { error
+                ? <P {...styles.error}>{errorToString(error)}</P>
+                : <>
+                <div style={{ display: 'flex' }}>
+                  { userHasSubmitted
+                    ? <Note>Sie haben den Fragebogen bereits abgeschlossen.</Note>
+                    : <Note {...styles.strong}>{t('questionnaire/header', { questionCount, userAnswerCount })}</Note>
+                  }
+                  {
+                    questionCount === userAnswerCount
+                      ? <div {...styles.progressIcon}><CheckCircle size={22} color={colors.primary} /></div>
+                      : (updating || submitting)
+                      ? <div style={{ marginLeft: 5, marginTop: 3 }}><InlineSpinner size={24} /></div>
+                      : null
+                  }
+                </div>
+                </>
+              }
+            </div>
           </div>
         )
       }} />
@@ -175,6 +163,17 @@ mutation submitAnswer($answerId: ID!, $questionId: ID!, $payload: JSON) {
         id
         payload
       }
+    }
+    ... on QuestionTypeChoice {
+      results: result {
+        count
+        option {
+          label
+          value
+          category
+        }
+      }
+      turnout {skipped submitted}
     }
   }
 }
@@ -233,7 +232,6 @@ export default compose(
             questionId,
             payload
           },
-          /*
           optimisticResponse: {
             __typename: 'Mutation',
             submitAnswer: {
@@ -247,14 +245,12 @@ export default compose(
             }
           },
           update: (proxy, { data: { submitAnswer } }) => {
-            const queryObj = { query, variables: { slug: router.query.slug } }
+            const queryObj = { query, variables: { slug } }
             const data = proxy.readQuery(queryObj)
 
             const questionIx = data.questionnaire.questions.findIndex(q => q.id === questionId)
             const question = data.questionnaire.questions[questionIx]
             question.userAnswer = submitAnswer.userAnswer
-
-            console.log({ payload, submitAnswer})
 
             if (question.results) {
               const result = question.results.find( r =>
@@ -262,20 +258,20 @@ export default compose(
               )
               result.count++
             }
+            if (question.turnout) {
+              question.turnout.submitted++
+            }
 
             proxy.writeQuery({ ...queryObj, data })
-          },
-          */
-          refetchQueries: [{ query, variables: { slug } }]
+          }
         })
       }
     })
   }),
   graphql(query, {
     options: ({ slug }) => ({
-      variables: {
-        slug
-      }
+      pollInterval: 5000,
+      variables: { slug }
     })
   })
 )(Page)

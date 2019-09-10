@@ -79,7 +79,9 @@ class Chart extends Component {
     const userAnswerFalse = userAnswer && userAnswer.payload.value[0] == 'false'
 
     const getPercentage = (result) =>
-      Math.round(100/submitted*result.count)
+      submitted > 0
+      ? Math.round(100/submitted*result.count)
+      : 0
 
     const truePercent = getPercentage(trueResult)
     const falsePercent = getPercentage(falseResult)
