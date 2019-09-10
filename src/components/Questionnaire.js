@@ -5,6 +5,7 @@ import { compose, graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import CheckCircle from 'react-icons/lib/md/check-circle'
 import withT from '../lib/withT'
+import withMe from './Auth/withMe'
 import { errorToString } from '../lib/errors'
 
 import {
@@ -14,7 +15,8 @@ import {
   InlineSpinner,
   fontFamilies,
   Loader,
-  Editorial
+  Editorial,
+  A
 } from '@project-r/styleguide'
 
 import Question from './Question'
@@ -46,7 +48,13 @@ const styles = {
     marginLeft: 5,
     marginTop: 3,
     minHeight: 30
+  }),
+  signIn: css({
+    textAlign: 'center',
+    margin: '40px 0'
+
   })
+
 }
 
 class Page extends Component {
@@ -83,7 +91,7 @@ class Page extends Component {
       )
     }
 
-    const { data, t, meta } = this.props
+    const { data, me, t, meta } = this.props
 
     return (
       <Loader loading={data.loading} error={data.error} render={() => {
@@ -92,9 +100,15 @@ class Page extends Component {
         // handle not found or not started
         if (!data.questionnaire || new Date(data.questionnaire.beginDate) > now) {
           return (
-            <div>
+            <P {...styles.error}>
               Der Fragebogen konnte nicht gefunden werden.
-            </div>
+            </P>
+          )
+        }
+
+        if (!me || !me.id) {
+          return (
+            <P {...styles.signIn}>Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen <A href="https://www.republik.ch/anmelden">müssen Sie sich anmelden</A>. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder löschen.</P>
           )
         }
 
@@ -223,6 +237,7 @@ query getQuestionnaire($slug: String!) {
 
 export default compose(
   withT,
+  withMe,
   graphql(submitAnswerMutation, {
     props: ({ mutate, ownProps: { slug } }) => ({
       submitAnswer: (questionId, payload, answerId) => {
