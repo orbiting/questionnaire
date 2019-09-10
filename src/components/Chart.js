@@ -60,6 +60,7 @@ const styles = {
   }),
   label: css({
     whiteSpace: 'nowrap',
+    marginBottom: 1
   }),
   userAnswerIcon: css({
     marginBottom: 4
@@ -88,6 +89,9 @@ class Chart extends Component {
 
     return (
       <div style={{ width: '100%' }}>
+        <div {...styles.labels} style={{ justifyContent: 'space-around' }}>
+          <label>{submitted} Stimmen</label>
+        </div>
         <div {...styles.bars}>
           <div {...styles.left}>
             <div {...styles.bar} style={{
