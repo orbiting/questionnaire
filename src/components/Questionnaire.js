@@ -321,7 +321,7 @@ export default compose(
   }),
   graphql(query, {
     options: ({ slug }) => ({
-      pollInterval: 5000,
+      pollInterval: 4000,
       variables: { slug }
     })
   })
