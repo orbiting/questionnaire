@@ -14,9 +14,15 @@ import {
   mediaQueries,
   InlineSpinner,
   fontFamilies,
+  fontStyles,
   Loader,
   Editorial,
-  A
+  A,
+  Overlay,
+  OverlayToolbar,
+  OverlayToolbarClose,
+  OverlayBody,
+  Button
 } from '@project-r/styleguide'
 
 import Question from './Question'
@@ -36,8 +42,8 @@ const styles = {
     //  bottom: 0
     //}
   }),
-  strong: css({
-    fontFamily: fontFamilies.sansSerifMedium,
+  footer: css({
+    ...fontStyles.sansSerifRegular18,
     margin: 10
   }),
   error: css({
@@ -60,7 +66,9 @@ const styles = {
 class Page extends Component {
   constructor (props) {
     super(props)
-    this.state = {}
+    this.state = {
+      showOverlay: false
+    }
   }
 
   render () {
@@ -116,7 +124,7 @@ class Page extends Component {
         const { questionnaire } = data
         const { questions, userHasSubmitted } = questionnaire
 
-        const { error, submitting, updating } = this.state
+        const { error, submitting, updating, showOverlay } = this.state
         const questionCount = questions.filter(Boolean).length
         const userAnswerCount = questions.map(q => q.userAnswer).filter(Boolean).length
 
@@ -138,23 +146,36 @@ class Page extends Component {
               )
             }
             <div {...styles.count}>
-              { error
-                ? <P {...styles.error}>{errorToString(error)}</P>
-                : <>
-                <div style={{ display: 'flex' }}>
-                  { userHasSubmitted
-                    ? <Note>Sie haben den Fragebogen bereits abgeschlossen.</Note>
-                    : <Note {...styles.strong}>{t('questionnaire/header', { questionCount, userAnswerCount })}</Note>
-                  }
-                  {
-                    questionCount === userAnswerCount
-                      ? <div {...styles.progressIcon}><CheckCircle size={22} color={colors.primary} /></div>
-                      : (updating || submitting)
-                      ? <div style={{ marginLeft: 5, marginTop: 3 }}><InlineSpinner size={24} /></div>
-                      : null
-                  }
-                </div>
-                </>
+              { error &&
+                <P {...styles.error}>{errorToString(error)}</P>
+              }
+              <div style={{ display: 'flex' }}>
+                { userHasSubmitted
+                  ? <P {...styles.footer}>Sie haben Ihre Antworten gelöscht und können daher nicht noch einmal teilnehmen.</P>
+                  : <P {...styles.footer}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
+                }
+                { (updating || submitting) &&
+                  <div style={{ marginLeft: 5, marginTop: 10 }}><InlineSpinner size={24} /></div>
+                }
+              </div>
+              { !userHasSubmitted &&
+                <P {...styles.footer} style={{ marginTop: 0 }}><A onClick={() => {this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten löschen?</A></P>
+              }
+              { showOverlay &&
+                <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
+                  <OverlayToolbar>
+                    <OverlayToolbarClose onClick={() => {this.setState({ showOverlay: false })}} />
+                  </OverlayToolbar>
+
+                  <OverlayBody>
+                    <P>
+                      Möchten Sie Ihre Antworten wirklich löschen? Wir können Ihnen danach nicht mehr anzeigen was Sie geantwortet haben und Sie können keine Antworten mehr abgeben.
+                    </P>
+                    <Button onClick={() => this.setState({ showOverlay: false})} >
+                      Löschen
+                    </Button>
+                  </OverlayBody>
+                </Overlay>
               }
             </div>
           </div>
