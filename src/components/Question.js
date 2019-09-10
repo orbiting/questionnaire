@@ -71,7 +71,7 @@ class ChoiceQuestion extends Component {
 
     return (
       <div {...styles.container}>
-        <H3 {...styles.question}>{text}</H3>
+        <P {...styles.question}>{text}</P>
         <div {...styles.content}>
           { (userAnswer || userHasSubmitted) &&
             <Chart question={question} />

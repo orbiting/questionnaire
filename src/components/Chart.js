@@ -8,9 +8,11 @@ import {
 } from '@project-r/styleguide'
 const { H2, H3, P } = Interaction
 import { css } from 'glamor'
+import CheckCircle from 'react-icons/lib/md/check-circle'
 
 const HEIGHT = 64
 const BAR_HEIGHT = 32
+const CIRCLE_SIZE = 22
 
 const styles = {
   bars: css({
@@ -39,6 +41,7 @@ const styles = {
     position: 'absolute',
     top: (HEIGHT-BAR_HEIGHT)/2,
     height: BAR_HEIGHT,
+    whiteSpace: 'nowrap',
   }),
   barLabel: css({
     fontFamily: fontFamilies.sansSerifRegular,
@@ -57,6 +60,9 @@ const styles = {
   }),
   label: css({
     whiteSpace: 'nowrap',
+  }),
+  userAnswerIcon: css({
+    marginBottom: 4
   })
 }
 
@@ -70,6 +76,7 @@ class Chart extends Component {
     const trueResult = results.find( r => r.option.value == 'true')
     const falseResult = results.find( r => r.option.value == 'false')
     const userAnswerTrue = userAnswer && userAnswer.payload.value[0] == 'true'
+    const userAnswerFalse = userAnswer && userAnswer.payload.value[0] == 'false'
 
     const getPercentage = (result) =>
       Math.round(100/submitted*result.count)
@@ -84,23 +91,31 @@ class Chart extends Component {
             <div {...styles.bar} style={{
               right: 0,
               width: `${truePercent}%`,
-              backgroundColor: '#2ca02c',
+              backgroundColor: 'rgb(75,151,201)',
               direction: 'rtl',
               textAlign: 'left',
-              fontWeight: (userAnswer && userAnswerTrue) ? 'bold' : 'normal',
             }}>
-              <label {...styles.barLabel}>Ja {truePercent}%</label>
+              <span style={{ marginLeft: userAnswerTrue ? -CIRCLE_SIZE : 0 }}>
+                <label {...styles.barLabel}>Ja {truePercent}%</label>
+                { userAnswerTrue &&
+                  <CheckCircle {...styles.userAnswerIcon} size={CIRCLE_SIZE} color={colors.primary} />
+                }
+              </span>
             </div>
           </div>
           <div {...styles.right}>
             <div {...styles.bar} style={{
               left: 0,
               width: `${falsePercent}%`,
-              backgroundColor: '#d62728',
+              backgroundColor: '#ff7f0e',
               textAlign: 'right',
-              fontWeight: (userAnswer && !userAnswerTrue) ? 'bold' : 'normal',
             }}>
-              <label {...styles.barLabel}>Nein {falsePercent}%</label>
+              <span style={{ marginRight: userAnswerFalse ? -CIRCLE_SIZE : 0 }}>
+                <label {...styles.barLabel}>Nein {falsePercent}%</label>
+                { userAnswerFalse &&
+                  <CheckCircle {...styles.userAnswerIcon} size={CIRCLE_SIZE} color={colors.primary} />
+                }
+              </span>
             </div>
           </div>
         </div>
