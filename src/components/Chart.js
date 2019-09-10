@@ -90,7 +90,7 @@ class Chart extends Component {
     return (
       <div style={{ width: '100%' }}>
         <div {...styles.labels} style={{ justifyContent: 'space-around' }}>
-          <label>{submitted} Stimmen</label>
+          <label>{submitted} {submitted === 1 ? 'Stimme' : 'Stimmen'}</label>
         </div>
         <div {...styles.bars}>
           <div {...styles.left}>
