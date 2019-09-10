@@ -154,7 +154,7 @@ class Page extends Component {
                 }
               </div>
               { !userHasSubmitted &&
-                <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={() => {this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten löschen?</A></P>
+                <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten löschen?</A></P>
               }
               { showOverlay &&
                 <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
