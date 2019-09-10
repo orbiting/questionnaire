@@ -111,7 +111,7 @@ class Page extends Component {
 
         if (!me || !me.id) {
           return (
-            <P {...styles.signIn}>Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen <A href="/anmelden">müssen Sie sich anmelden</A>. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder löschen.</P>
+            <P {...styles.signIn}>Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen <A href="/anmelden">müssen Sie sich anmelden</A>. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder anonymisieren.</P>
           )
         }
 
@@ -146,7 +146,7 @@ class Page extends Component {
               }
               <div style={{ display: 'flex' }}>
                 { userHasSubmitted
-                  ? <P {...styles.footer}>Sie haben Ihre Antworten gelöscht und können daher nicht noch einmal teilnehmen.</P>
+                  ? <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P>
                   : <P {...styles.footer}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
                 }
                 { (updating || submitting) &&
@@ -154,7 +154,7 @@ class Page extends Component {
                 }
               </div>
               { !userHasSubmitted &&
-                <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten löschen?</A></P>
+                <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten anonymisieren?</A></P>
               }
               { showOverlay &&
                 <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
@@ -164,7 +164,7 @@ class Page extends Component {
 
                   <OverlayBody>
                     <P>
-                      Möchten Sie Ihre Antworten wirklich löschen? Wir können Ihnen danach nicht mehr anzeigen was Sie geantwortet haben und Sie können keine Antworten mehr abgeben.
+                      Wenn Sie möchten können Sie Ihre Antworten anonymisieren. Sie bleiben in unserer Datenbank erhalten aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen was Sie geantwortet haben und Sie können keine Antworten mehr abgeben.
                     </P>
                     <Button style={{ marginTop: 10 }} onClick={(e) => {
                       e.preventDefault()
@@ -174,7 +174,7 @@ class Page extends Component {
                       )
                       this.setState({ showOverlay: false })
                     }} >
-                      Löschen
+                      Anonymisieren
                     </Button>
                   </OverlayBody>
                 </Overlay>
