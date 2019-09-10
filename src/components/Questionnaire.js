@@ -294,7 +294,7 @@ export default compose(
               },
               results: question.results.map(r => ({
                 ...r,
-                count: r.count + (r.option.value === payload.value
+                count: r.count + (r.option.value == payload.value
                   ? 1
                   : 0
                 )
