@@ -40,13 +40,6 @@ export default [
         }]
       ]
     }),
-    replace({
-      include: ['node_modules/uuid/**'],
-      delimiters: ['', ''],
-      values: {
-        'crypto.randomBytes': 'require(\'randombytes\')'
-      }
-    }),
     builtins(),
     resolve(),
     commonjs(),
