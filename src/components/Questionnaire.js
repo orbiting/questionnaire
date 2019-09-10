@@ -163,9 +163,7 @@ class Page extends Component {
                   </OverlayToolbar>
 
                   <OverlayBody>
-                    <P>
-                      Wenn Sie möchten können Sie Ihre Antworten anonymisieren. Sie bleiben in unserer Datenbank erhalten aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen was Sie geantwortet haben und Sie können keine Antworten mehr abgeben.
-                    </P>
+                    <P>Wenn Sie möchten, können Sie Ihre Antworten anonymisieren. Diese bleiben zwar in unserer Datenbank erhalten aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen was Sie geantwortet haben und Sie können keine Antworten mehr abgeben.</P>
                     <Button style={{ marginTop: 10 }} onClick={(e) => {
                       e.preventDefault()
                       this.processSubmit(
