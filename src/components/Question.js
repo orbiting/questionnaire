@@ -7,7 +7,8 @@ import {
   Button,
   fontStyles,
   fontFamilies,
-  colors
+  colors,
+  mediaQueries
 } from '@project-r/styleguide'
 const { H2, H3, P } = Interaction
 import withT from '../lib/withT'
@@ -21,16 +22,20 @@ const styles = {
     margin: '0px 0 10px 0',
   }),
   content: css({
-    width: '100%',
     height: 80,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
   }),
+  mobileBorder: css({
+    [mediaQueries.onlyS]: {
+      margin: '0px 10px'
+    }
+  }),
   buttons: css({
     width: '100%',
     display: 'flex',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-evenly'
   }),
 }
 
@@ -74,7 +79,9 @@ class ChoiceQuestion extends Component {
         <P {...styles.question}>{text}</P>
         <div {...styles.content}>
           { (userAnswer || userHasSubmitted) &&
-            <Chart question={question} />
+            <div {...styles.mobileBorder}>
+              <Chart question={question} />
+            </div>
           }
           { (!userAnswer && !userHasSubmitted) &&
             <div {...styles.buttons}>
