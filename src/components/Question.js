@@ -71,7 +71,7 @@ class ChoiceQuestion extends Component {
     }
 
     const { questionnaire, question: { id, text, userAnswer, options, results } } = this.props
-    const { question, style } = this.props
+    const { question } = this.props
     const { userHasSubmitted } = questionnaire
 
     return (
