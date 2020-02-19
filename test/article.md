@@ -24,7 +24,7 @@ Was möchten Sie Fragen?
   "props": {
     "slug": "mss-demokratie"
   },
-  "src": "https://cdn.republik.space/s3/republik-assets/dynamic-components/questionnaire-dn/index.js"
+  "src": "https://cdn.republik.space/s3/republik-assets/dynamic-components/questionnaire/index.js"
 }
 ```
 

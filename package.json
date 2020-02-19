@@ -1,5 +1,5 @@
 {
-  "name": "questionnaire-dn",
+  "name": "questionnaire",
   "version": "0.0.1",
   "description": "use a questionnaire inline",
   "main": "index.js",
@@ -11,18 +11,18 @@
     "now-build": "NODE_ENV=production rollup -c && cd test && next build",
     "heroku-postbuild": "NODE_ENV=production rollup -c && cd test && next build",
     "start": "NODE_ENV=production cd test && node server.js",
-    "deploy": "s3cmd sync --exclude '.DS_Store' --verbose --acl-public build/ s3://republik-assets/dynamic-components/questionnaire-dn/"
+    "deploy": "s3cmd sync --exclude '.DS_Store' --verbose --acl-public build/ s3://republik-assets/dynamic-components/questionnaire/"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/orbiting/questionnaire-dn.git"
+    "url": "git+https://github.com/orbiting/questionnaire.git"
   },
   "author": "",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/orbiting/questionnaire-dn/issues"
+    "url": "https://github.com/orbiting/questionnaire/issues"
   },
-  "homepage": "https://github.com/orbiting/questionnaire-dn#readme",
+  "homepage": "https://github.com/orbiting/questionnaire#readme",
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.51",
     "@babel/preset-env": "^7.0.0-beta.51",
