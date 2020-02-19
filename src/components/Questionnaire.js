@@ -30,10 +30,15 @@ import Question from './Question'
 const { P } = Interaction
 const { Note } = Editorial
 
+const HEADER_HEIGHT = 60
+const HEADER_HEIGHT_MOBILE = 45
+
 const styles = {
+  container: css({
+    margin: '50px 0 10px 0'
+  }),
   count: css({
     background: '#fff',
-    zIndex: 10,
     borderTop: `0.5px solid ${colors.divider}`,
     minHeight: 25
   }),
@@ -54,8 +59,16 @@ const styles = {
     textAlign: 'center',
     margin: '40px 0'
 
-  })
-
+  }),
+  group: css({
+    background: '#fff',
+    zIndex: 10,
+    position: 'sticky',
+    top: HEADER_HEIGHT - 1,
+    [mediaQueries.onlyS]: {
+      top: HEADER_HEIGHT_MOBILE - 1
+    },
+  }),
 }
 
 class Page extends Component {
@@ -123,22 +136,58 @@ class Page extends Component {
         const questionCount = questions.filter(Boolean).length
         const userAnswerCount = questions.map(q => q.userAnswer).filter(Boolean).length
 
-        return (
-          <div>
+        const elementForQuestion = q =>
+          React.createElement(
+            Question,
             {
-              questions
-              //.slice(0, userHasSubmitted ? questionCount : userAnswerCount + 1)
-              .map(q =>
-                  React.createElement(
-                    Question,
-                    {
-                      onChange: this.createHandleChange(q),
-                      questionnaire,
-                      question: q,
-                      key: q.id
-                    }
+              onChange: this.createHandleChange(q),
+              questionnaire,
+              question: q,
+              key: q.id
+            }
+          )
+
+        // rolls questions into groups. The last question of a group is left outside
+        // for nicer sticky behaviour
+        const items = []
+        let group
+        questions.forEach( (q, index) => {
+          const groupText = q.metadata && q.metadata.group
+          const nextQuestion = questions[index+1]
+          const nextHasGroup = nextQuestion && nextQuestion.metadata && nextQuestion.metadata.group
+          const isLast = index === questions.length - 1
+          if (groupText) {
+            group = {
+              text: groupText,
+              questions: [],
+              __typename: 'QuestionGroup'
+            }
+            items.push(group)
+          }
+          if (group && !nextHasGroup && !isLast) {
+            group.questions.push(q)
+          } else {
+            items.push(q)
+          }
+        })
+
+        return (
+          <div {...styles.container}>
+            {
+              items.map((i, index) => {
+                if (i.__typename === 'QuestionGroup') {
+                  return (
+                    <div key={`group-${index}`}>
+                      <P {...styles.group}>{i.text}</P>
+                      {
+                        i.questions.map(q => elementForQuestion(q))
+                      }
+                    </div>
                   )
-              )
+                } else {
+                  return elementForQuestion(i)
+                }
+              })
             }
             <div {...styles.count}>
               { error &&
@@ -241,10 +290,12 @@ query getQuestionnaire($slug: String!) {
         id
         order
         text
+        metadata
         userAnswer {
           id
           payload
         }
+        __typename
       }
       ... on QuestionTypeChoice {
         cardinality

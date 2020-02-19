@@ -39,7 +39,7 @@ npm run deploy
 Goto https://app.keycdn.com/zones/purgeurl/87880 and enter:
 
 ```
-/s3/republik-assets/dynamic-components/questionnaire-dn/index.js
+/s3/republik-assets/dynamic-components/questionnaire/index.js
 ```
 
 If you change asset files be sure to purge those too.

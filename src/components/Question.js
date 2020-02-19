@@ -16,7 +16,7 @@ import Chart from './Chart'
 
 const styles = {
   container: css({
-    margin: '50px 0 10px 0'
+    paddingBottom: 50
   }),
   question: css({
     margin: '0px 0 10px 0',
@@ -71,8 +71,8 @@ class ChoiceQuestion extends Component {
     }
 
     const { questionnaire, question: { id, text, userAnswer, options, results } } = this.props
-    const { question } = this.props
-	  const { userHasSubmitted } = questionnaire
+    const { question, style } = this.props
+    const { userHasSubmitted } = questionnaire
 
     return (
       <div {...styles.container}>
