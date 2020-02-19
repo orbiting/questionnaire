@@ -22,7 +22,7 @@ Was möchten Sie Fragen?
 {
   "autoHtml": false,
   "props": {
-    "slug": "mss-vaterschaftsurlaub"
+    "slug": "mss-demokratie"
   },
   "src": "https://cdn.republik.space/s3/republik-assets/dynamic-components/questionnaire-dn/index.js"
 }
