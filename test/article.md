@@ -23,7 +23,7 @@ Was möchten Sie Fragen?
   "autoHtml": false,
   "props": {
     "slug": "mss-demokratie",
-    "colors": [{ "value": true, "color": "#2ca02c" }, { "value": false, "color": "#9467bd" }]
+    "colors": [{ "value": true, "color": "#6FB977" }, { "value": false, "color": "#AD8BBD" }]
   },
   "src": "https://cdn.republik.space/s3/republik-assets/dynamic-components/questionnaire/index.js"
 }
