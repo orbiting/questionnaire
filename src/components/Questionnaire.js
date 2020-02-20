@@ -22,7 +22,8 @@ import {
   OverlayToolbar,
   OverlayToolbarClose,
   OverlayBody,
-  Button
+  Button,
+  Center
 } from '@project-r/styleguide'
 
 import Question from './Question'
@@ -61,6 +62,7 @@ const styles = {
   group: css({
     background: '#fff',
     borderBottom: `0.5px solid ${colors.divider}`,
+    marginBottom: 10,
     zIndex: 10,
     position: 'sticky',
     top: HEADER_HEIGHT - 1,
@@ -107,137 +109,143 @@ class Page extends Component {
     }
 
     const { data, me, t, meta, colors, questionIndex } = this.props
+    const singleQuestion = questionIndex !== undefined && questionIndex !== null
+    const Wrapper = singleQuestion ? Center : React.Fragment
 
     return (
-      <Loader loading={data.loading} error={data.error} render={() => {
-        const now = new Date()
+      <Wrapper>
+        <Loader loading={data.loading} error={data.error} render={() => {
+          const now = new Date()
 
-        // handle not found or not started
-        if (!data.questionnaire || new Date(data.questionnaire.beginDate) > now) {
-          return (
-            <P {...styles.error}>
-              Der Fragebogen konnte nicht gefunden werden.
-            </P>
-          )
-        }
-
-        if (!me || !me.id) {
-          return (
-            <div {...styles.signIn}>
-              <P><A href="/anmelden">Melden Sie sich an</A> um an der Umfrage teilzunehmen und live zu sehen wo Sie im Vergleich zu allen Anderen stehen. Sie können Ihre Antworten jederzeit anonymisieren.</P>
-              <P>Das erste Mal hier? Starten Sie am besten gleich ein <A href="/probelesen">kostenloses Probeabo für 14 Tage</A>.</P>
-            </div>
-          )
-        }
-
-        // handle questions
-        const { questionnaire } = data
-        const { questions, userHasSubmitted } = questionnaire
-
-        const { error, submitting, updating, showOverlay } = this.state
-        const questionCount = questions.filter(Boolean).length
-        const userAnswerCount = questions.map(q => q.userAnswer).filter(Boolean).length
-
-        const elementForQuestion = q =>
-          React.createElement(
-            Question,
-            {
-              onChange: this.createHandleChange(q),
-              questionnaire,
-              question: q,
-              key: q.id,
-              colors
-            }
-          )
-
-        // rolls questions into groups. The last question of a group is left outside
-        // for nicer sticky behaviour
-        const items = []
-        let group
-        questions.forEach( (q, index) => {
-          const groupText = q.metadata && q.metadata.group
-          const nextQuestion = questions[index+1]
-          const nextHasGroup = nextQuestion && nextQuestion.metadata && nextQuestion.metadata.group
-          const isLast = index === questions.length - 1
-          if (groupText) {
-            group = {
-              text: groupText,
-              questions: [],
-              __typename: 'QuestionGroup'
-            }
-            items.push(group)
+          // handle not found or not started
+          if (!data.questionnaire || new Date(data.questionnaire.beginDate) > now) {
+            return (
+              <P {...styles.error}>
+                Der Fragebogen konnte nicht gefunden werden.
+              </P>
+            )
           }
-          if (questionIndex && index !== questionIndex) {
-            return
-          }
-          if (group && !nextHasGroup && !isLast) {
-            group.questions.push(q)
-          } else {
-            items.push(q)
-          }
-        })
 
-        return (
-          <div {...styles.container}>
-            {
-              items
-                .filter( i => i && (!i.questions || (i.questions && i.questions.length)))
-                .map((i, index) => {
-                  if (i.__typename === 'QuestionGroup') {
-                    return (
-                      <div key={`group-${index}`}>
-                        <P {...styles.group}>{i.text}</P>
-                        {
-                          i.questions.map(q => elementForQuestion(q))
-                        }
-                      </div>
-                    )
-                  } else {
-                    return elementForQuestion(i)
-                  }
-                })
-            }
-            <div {...styles.count}>
-              { error &&
-                <P {...styles.error}>{errorToString(error)}</P>
-              }
-              <div style={{ display: 'flex' }}>
-                { userHasSubmitted
-                  ? <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P>
-                  : <P {...styles.footer}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
-                }
-                { (updating || submitting) &&
-                  <div style={{ marginLeft: 5, marginTop: 10 }}><InlineSpinner size={24} /></div>
-                }
+          if (!me || !me.id) {
+            return (
+              <div {...styles.signIn}>
+                <P><A href="/anmelden">Melden Sie sich an</A> um an der Umfrage teilzunehmen und live zu sehen wo Sie im Vergleich zu allen Anderen stehen. Sie können Ihre Antworten jederzeit anonymisieren.</P>
+                <P>Das erste Mal hier? Starten Sie am besten gleich ein <A href="/probelesen">kostenloses Probeabo für 14 Tage</A>.</P>
               </div>
-              { !userHasSubmitted &&
-                <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten anonymisieren?</A></P>
-              }
-              { showOverlay &&
-                <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
-                  <OverlayToolbar>
-                    <OverlayToolbarClose onClick={() => {this.setState({ showOverlay: false })}} />
-                  </OverlayToolbar>
+            )
+          }
 
-                  <OverlayBody>
-                    <P>Wenn Sie möchten, können Sie Ihre Antworten anonymisieren. Diese bleiben zwar in unserer Datenbank erhalten, aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen, was Sie geantwortet haben, und Sie können keine Antworten mehr abgeben.</P>
-                    <Button style={{ marginTop: 10 }} onClick={(e) => {
-                      e.preventDefault()
-                      this.processSubmit(
-                        this.props.anonymizeUserAnswers,
-                        questionnaire.id
+          // handle questions
+          const { questionnaire } = data
+          const { questions, userHasSubmitted } = questionnaire
+
+          const { error, submitting, updating, showOverlay } = this.state
+          const questionCount = questions.filter(Boolean).length
+          const userAnswerCount = questions.map(q => q.userAnswer).filter(Boolean).length
+
+          const elementForQuestion = q =>
+            React.createElement(
+              Question,
+              {
+                onChange: this.createHandleChange(q),
+                questionnaire,
+                question: q,
+                key: q.id,
+                colors
+              }
+            )
+
+          // rolls questions into groups. The last question of a group is left outside
+          // for nicer sticky behaviour
+          const items = []
+          let group
+          questions.forEach( (q, index) => {
+            const groupText = q.metadata && q.metadata.group
+            const nextQuestion = questions[index+1]
+            const nextHasGroup = nextQuestion && nextQuestion.metadata && nextQuestion.metadata.group
+            const isLast = index === questions.length - 1
+            if (groupText) {
+              group = {
+                text: groupText,
+                questions: [],
+                __typename: 'QuestionGroup'
+              }
+              items.push(group)
+            }
+            if (questionIndex && index !== questionIndex) {
+              return
+            }
+            if (group && !nextHasGroup && !isLast) {
+              group.questions.push(q)
+            } else {
+              items.push(q)
+            }
+          })
+
+          return (
+            <div {...styles.container}>
+              {
+                items
+                  .filter( i => i && (!i.questions || (i.questions && i.questions.length)))
+                  .map((i, index) => {
+                    if (i.__typename === 'QuestionGroup') {
+                      return (
+                        <div key={`group-${index}`}>
+                          <P {...styles.group}>{i.text}</P>
+                          {
+                            i.questions.map(q => elementForQuestion(q))
+                          }
+                        </div>
                       )
-                      this.setState({ showOverlay: false })
-                    }} >
-                      Anonymisieren
-                    </Button>
-                  </OverlayBody>
-                </Overlay>
+                    } else {
+                      return elementForQuestion(i)
+                    }
+                  })
+              }
+              { !singleQuestion &&
+                <div {...styles.count}>
+                  { error &&
+                    <P {...styles.error}>{errorToString(error)}</P>
+                  }
+                  <div style={{ display: 'flex' }}>
+                    { userHasSubmitted
+                      ? <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P>
+                      : <P {...styles.footer}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
+                    }
+                    { (updating || submitting) &&
+                      <div style={{ marginLeft: 5, marginTop: 10 }}><InlineSpinner size={24} /></div>
+                    }
+                  </div>
+                  { !userHasSubmitted &&
+                    <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten anonymisieren?</A></P>
+                  }
+                  { showOverlay &&
+                    <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
+                      <OverlayToolbar>
+                        <OverlayToolbarClose onClick={() => {this.setState({ showOverlay: false })}} />
+                      </OverlayToolbar>
+
+                      <OverlayBody>
+                        <P>Wenn Sie möchten, können Sie Ihre Antworten anonymisieren. Diese bleiben zwar in unserer Datenbank erhalten, aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen, was Sie geantwortet haben, und Sie können keine Antworten mehr abgeben.</P>
+                        <Button style={{ marginTop: 10 }} onClick={(e) => {
+                          e.preventDefault()
+                          this.processSubmit(
+                            this.props.anonymizeUserAnswers,
+                            questionnaire.id
+                          )
+                          this.setState({ showOverlay: false })
+                        }} >
+                          Anonymisieren
+                        </Button>
+                      </OverlayBody>
+                    </Overlay>
+                  }
+                </div>
               }
             </div>
-          </div>
-        )
-      }} />
+          )
+        }} />
+      </Wrapper>
     )
   }
 }

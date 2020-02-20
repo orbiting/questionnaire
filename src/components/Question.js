@@ -16,7 +16,7 @@ import Chart from './Chart'
 
 const styles = {
   container: css({
-    paddingBottom: 50
+    paddingBottom: 30
   }),
   question: css({
     margin: '0px 0 10px 0',
