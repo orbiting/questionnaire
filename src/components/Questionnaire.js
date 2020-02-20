@@ -62,6 +62,7 @@ const styles = {
   }),
   group: css({
     background: '#fff',
+    borderBottom: `0.5px solid ${colors.divider}`,
     zIndex: 10,
     position: 'sticky',
     top: HEADER_HEIGHT - 1,
