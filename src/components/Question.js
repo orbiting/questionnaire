@@ -51,7 +51,14 @@ class ChoiceQuestion extends Component {
   render () {
 
     this.handleChange = (value) => {
-      const { onChange, questionnaire, question: { userAnswer, cardinality } } = this.props
+      const {
+        onChange,
+        questionnaire,
+        question: {
+          userAnswer,
+          cardinality
+        }
+      } = this.props
       const nextValue = new Set(userAnswer ? userAnswer.payload.value : [])
 
       if (cardinality === 0 || cardinality > 1) {
@@ -70,9 +77,18 @@ class ChoiceQuestion extends Component {
       onChange(answerId, Array.from(nextValue))
     }
 
-    const { questionnaire, question: { id, text, userAnswer, options, results } } = this.props
+    const {
+      questionnaire = {},
+      question: {
+        id,
+        text,
+        userAnswer,
+        options,
+        results
+      }
+    } = this.props
     const { question, colors } = this.props
-    const { userHasSubmitted } = questionnaire
+    const { userHasSubmitted = false } = questionnaire
 
     return (
       <div {...styles.container}>
