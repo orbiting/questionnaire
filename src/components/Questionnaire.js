@@ -107,7 +107,7 @@ class Page extends Component {
       )
     }
 
-    const { data, me, t, meta } = this.props
+    const { data, me, t, meta, colors } = this.props
 
     return (
       <Loader loading={data.loading} error={data.error} render={() => {
@@ -143,7 +143,8 @@ class Page extends Component {
               onChange: this.createHandleChange(q),
               questionnaire,
               question: q,
-              key: q.id
+              key: q.id,
+              colors
             }
           )
 

@@ -71,7 +71,7 @@ class ChoiceQuestion extends Component {
     }
 
     const { questionnaire, question: { id, text, userAnswer, options, results } } = this.props
-    const { question } = this.props
+    const { question, colors } = this.props
     const { userHasSubmitted } = questionnaire
 
     return (
@@ -80,7 +80,7 @@ class ChoiceQuestion extends Component {
         <div {...styles.content}>
           { (userAnswer || userHasSubmitted) &&
             <div {...styles.mobileBorder}>
-              <Chart question={question} />
+              <Chart question={question} colors={colors} />
             </div>
           }
           { (!userAnswer && !userHasSubmitted) &&

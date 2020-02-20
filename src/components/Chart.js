@@ -69,7 +69,7 @@ const styles = {
 
 class Chart extends Component {
   render () {
-    const { question } = this.props
+    const { question, colors = [] } = this.props
     if (!question || !question.results) {
       return
     }
@@ -87,6 +87,9 @@ class Chart extends Component {
     const truePercent = getPercentage(trueResult)
     const falsePercent = getPercentage(falseResult)
 
+    const trueColor = colors.find(c => c.value)
+    const falseColor = colors.find(c => !c.value)
+
     return (
       <div style={{ width: '100%' }}>
         <div {...styles.labels} style={{ justifyContent: 'space-around' }}>
@@ -97,7 +100,7 @@ class Chart extends Component {
             <div {...styles.bar} style={{
               right: 0,
               width: `${truePercent}%`,
-              backgroundColor: 'rgb(75,151,201)',
+              backgroundColor: (trueColor && trueColor.color) || 'rgb(75,151,201)',
               direction: 'rtl',
               textAlign: 'left',
             }}>
@@ -113,7 +116,7 @@ class Chart extends Component {
             <div {...styles.bar} style={{
               left: 0,
               width: `${falsePercent}%`,
-              backgroundColor: '#ff7f0e',
+              backgroundColor: (falseColor && falseColor.color) || '#ff7f0e',
               textAlign: 'right',
             }}>
               <span style={{ marginRight: userAnswerFalse ? -CIRCLE_SIZE : 0 }}>
