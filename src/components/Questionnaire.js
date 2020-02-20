@@ -56,9 +56,7 @@ const styles = {
     minHeight: 30
   }),
   signIn: css({
-    textAlign: 'center',
-    margin: '40px 0'
-
+    margin: '60px 0'
   }),
   group: css({
     background: '#fff',
@@ -125,7 +123,10 @@ class Page extends Component {
 
         if (!me || !me.id) {
           return (
-            <P {...styles.signIn}>Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen <A href="/anmelden">müssen Sie sich anmelden</A>. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder anonymisieren.</P>
+            <div {...styles.signIn}>
+              <P><A href="/anmelden">Melden Sie sich an</A> um an der Umfrage teilzunehmen und live zu sehen wo Sie im Vergleich zu allen Anderen stehen. Sie können Ihre Antworten jederzeit anonymisieren.</P>
+              <P>Das erste Mal hier? Starten Sie am besten gleich ein <A href="/probelesen">kostenloses Probeabo für 14 Tage</A>.</P>
+            </div>
           )
         }
 
