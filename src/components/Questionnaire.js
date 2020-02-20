@@ -189,7 +189,7 @@ class Page extends Component {
             <div {...styles.container}>
               { !pdfRendering && !me &&
                 <div {...styles.signIn} style={{ marginBottom: forceShowResults ? 30 : 60 }}>
-                  <P><A href="/anmelden">Melden Sie sich an</A>, um an der Umfrage teilzunehmen und live zu sehen, wo Sie im Vergleich zu allen Anderen stehen. Sie können Ihre Antworten jederzeit anonymisieren.</P>
+                  <P><A href="/anmelden">Melden Sie sich an</A>, um an der Umfrage teilzunehmen und live zu sehen, wo Sie im Vergleich zu allen anderen stehen. Sie können Ihre Antworten jederzeit anonymisieren.</P>
                   <P>Das erste Mal hier? Starten Sie am besten gleich ein <A href="/probelesen">kostenloses Probeabo für 14 Tage</A>.</P>
                   <br/>
                   { !forceShowResults &&
