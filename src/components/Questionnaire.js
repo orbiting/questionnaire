@@ -106,7 +106,7 @@ class Page extends Component {
       )
     }
 
-    const { data, me, t, meta, colors } = this.props
+    const { data, me, t, meta, colors, questionIndex } = this.props
 
     return (
       <Loader loading={data.loading} error={data.error} render={() => {
@@ -167,6 +167,9 @@ class Page extends Component {
             }
             items.push(group)
           }
+          if (questionIndex && index !== questionIndex) {
+            return
+          }
           if (group && !nextHasGroup && !isLast) {
             group.questions.push(q)
           } else {
@@ -177,20 +180,22 @@ class Page extends Component {
         return (
           <div {...styles.container}>
             {
-              items.map((i, index) => {
-                if (i.__typename === 'QuestionGroup') {
-                  return (
-                    <div key={`group-${index}`}>
-                      <P {...styles.group}>{i.text}</P>
-                      {
-                        i.questions.map(q => elementForQuestion(q))
-                      }
-                    </div>
-                  )
-                } else {
-                  return elementForQuestion(i)
-                }
-              })
+              items
+                .filter( i => i && (!i.questions || (i.questions && i.questions.length)))
+                .map((i, index) => {
+                  if (i.__typename === 'QuestionGroup') {
+                    return (
+                      <div key={`group-${index}`}>
+                        <P {...styles.group}>{i.text}</P>
+                        {
+                          i.questions.map(q => elementForQuestion(q))
+                        }
+                      </div>
+                    )
+                  } else {
+                    return elementForQuestion(i)
+                  }
+                })
             }
             <div {...styles.count}>
               { error &&
