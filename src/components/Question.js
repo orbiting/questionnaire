@@ -85,21 +85,24 @@ class ChoiceQuestion extends Component {
         userAnswer,
         options,
         results
-      }
+      },
+      forceShowResults = false
     } = this.props
     const { question, colors } = this.props
     const { userHasSubmitted = false } = questionnaire
+
+    const showResults = userAnswer || userHasSubmitted || forceShowResults
 
     return (
       <div {...styles.container}>
         <P {...styles.question}>{text}</P>
         <div {...styles.content}>
-          { (userAnswer || userHasSubmitted) &&
+          { showResults &&
             <div {...styles.mobileBorder}>
               <Chart question={question} colors={colors} />
             </div>
           }
-          { (!userAnswer && !userHasSubmitted) &&
+          { !showResults &&
             <div {...styles.buttons}>
               { options.map(option =>
                 <div key={`${id}-${option.value}`}>

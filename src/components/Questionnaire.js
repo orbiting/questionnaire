@@ -57,7 +57,7 @@ const styles = {
     minHeight: 30
   }),
   signIn: css({
-    margin: '60px 0'
+    marginTop: 60
   }),
   group: css({
     background: '#fff',
@@ -76,7 +76,8 @@ class Page extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      showOverlay: false
+      showOverlay: false,
+      forceShowResults: false
     }
   }
 
@@ -108,13 +109,23 @@ class Page extends Component {
       )
     }
 
+    this.onClickForceShowResults = event => {
+      event.preventDefault()
+      this.setState({
+        forceShowResults: true
+      })
+    }
+
     const { data, me, t, meta, colors, questionIndex } = this.props
     const singleQuestion = questionIndex !== undefined && questionIndex !== null
     const Wrapper = singleQuestion ? Center : React.Fragment
 
+    const pdfRendering = typeof window !== 'undefined' && window.location.search && window.location.search.indexOf('extract')
+    const forceShowResults = this.state.forceShowResults || pdfRendering
+
     return (
       <Wrapper>
-        <Loader loading={data.loading} error={data.error} render={() => {
+        <Loader loading={data.loading && !data.questionnaire} error={data.error} render={() => {
           const now = new Date()
 
           // handle not found or not started
@@ -123,15 +134,6 @@ class Page extends Component {
               <P {...styles.error}>
                 Der Fragebogen konnte nicht gefunden werden.
               </P>
-            )
-          }
-
-          if (!me || !me.id) {
-            return (
-              <div {...styles.signIn}>
-                <P><A href="/anmelden">Melden Sie sich an</A> um an der Umfrage teilzunehmen und live zu sehen wo Sie im Vergleich zu allen Anderen stehen. Sie können Ihre Antworten jederzeit anonymisieren.</P>
-                <P>Das erste Mal hier? Starten Sie am besten gleich ein <A href="/probelesen">kostenloses Probeabo für 14 Tage</A>.</P>
-              </div>
             )
           }
 
@@ -151,7 +153,8 @@ class Page extends Component {
                 questionnaire,
                 question: q,
                 key: q.id,
-                colors
+                colors,
+                forceShowResults
               }
             )
 
@@ -184,63 +187,79 @@ class Page extends Component {
 
           return (
             <div {...styles.container}>
-              {
-                items
-                  .filter( i => i && (!i.questions || (i.questions && i.questions.length)))
-                  .map((i, index) => {
-                    if (i.__typename === 'QuestionGroup') {
-                      return (
-                        <div key={`group-${index}`}>
-                          <P {...styles.group}>{i.text}</P>
-                          {
-                            i.questions.map(q => elementForQuestion(q))
-                          }
-                        </div>
-                      )
-                    } else {
-                      return elementForQuestion(i)
-                    }
-                  })
-              }
-              { !singleQuestion &&
-                <div {...styles.count}>
-                  { error &&
-                    <P {...styles.error}>{errorToString(error)}</P>
-                  }
-                  <div style={{ display: 'flex' }}>
-                    { userHasSubmitted
-                      ? <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P>
-                      : <P {...styles.footer}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
-                    }
-                    { (updating || submitting) &&
-                      <div style={{ marginLeft: 5, marginTop: 10 }}><InlineSpinner size={24} /></div>
-                    }
-                  </div>
-                  { !userHasSubmitted &&
-                    <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten anonymisieren?</A></P>
-                  }
-                  { showOverlay &&
-                    <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
-                      <OverlayToolbar>
-                        <OverlayToolbarClose onClick={() => {this.setState({ showOverlay: false })}} />
-                      </OverlayToolbar>
-
-                      <OverlayBody>
-                        <P>Wenn Sie möchten, können Sie Ihre Antworten anonymisieren. Diese bleiben zwar in unserer Datenbank erhalten, aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen, was Sie geantwortet haben, und Sie können keine Antworten mehr abgeben.</P>
-                        <Button style={{ marginTop: 10 }} onClick={(e) => {
-                          e.preventDefault()
-                          this.processSubmit(
-                            this.props.anonymizeUserAnswers,
-                            questionnaire.id
-                          )
-                          this.setState({ showOverlay: false })
-                        }} >
-                          Anonymisieren
-                        </Button>
-                      </OverlayBody>
-                    </Overlay>
+              { !pdfRendering && !me &&
+                <div {...styles.signIn} style={{ marginBottom: forceShowResults ? 30 : 60 }}>
+                  <P><A href="/anmelden">Melden Sie sich an</A>, um an der Umfrage teilzunehmen und live zu sehen, wo Sie im Vergleich zu allen Anderen stehen. Sie können Ihre Antworten jederzeit anonymisieren.</P>
+                  <P>Das erste Mal hier? Starten Sie am besten gleich ein <A href="/probelesen">kostenloses Probeabo für 14 Tage</A>.</P>
+                  <br/>
+                  { !forceShowResults &&
+                    <P style={{ fontSize: 16 }}>Jetzt gerade nicht? <A href='#' onClick={this.onClickForceShowResults}>Resultate anzeigen</A>.</P>
                   }
                 </div>
+              }
+              { (me || forceShowResults) &&
+                <>
+                  {
+                    items
+                      .filter( i => i && (!i.questions || (i.questions && i.questions.length)))
+                      .map((i, index) => {
+                        if (i.__typename === 'QuestionGroup') {
+                          return (
+                            <div key={`group-${index}`}>
+                              <P {...styles.group}>{i.text}</P>
+                              {
+                                i.questions.map(q => elementForQuestion(q))
+                              }
+                            </div>
+                          )
+                        } else {
+                          return elementForQuestion(i)
+                        }
+                      })
+                  }
+                  { me && !singleQuestion &&
+                    <div {...styles.count}>
+                      { error &&
+                        <P {...styles.error}>{errorToString(error)}</P>
+                      }
+                      <div style={{ display: 'flex' }}>
+                        { userHasSubmitted
+                          ? <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P>
+                          : <P {...styles.footer}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
+                        }
+                        { (updating || submitting) &&
+                          <div style={{ marginLeft: 5, marginTop: 10 }}><InlineSpinner size={24} /></div>
+                        }
+                      </div>
+                      { !userHasSubmitted &&
+                        <P {...styles.footer} style={{ marginTop: 0 }}>
+                          <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten anonymisieren?</A>
+                        </P>
+                      }
+                      { showOverlay &&
+                        <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
+                          <OverlayToolbar>
+                            <OverlayToolbarClose onClick={() => {this.setState({ showOverlay: false })}} />
+                          </OverlayToolbar>
+
+                          <OverlayBody>
+                            <P>Wenn Sie möchten, können Sie Ihre Antworten anonymisieren. Diese bleiben zwar in unserer Datenbank erhalten, aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen, was Sie geantwortet haben, und Sie können keine Antworten mehr abgeben.</P>
+                            <Button style={{ marginTop: 10 }} onClick={(e) => {
+                              e.preventDefault()
+                              this.processSubmit(
+                                this.props.anonymizeUserAnswers,
+                                questionnaire.id
+                              )
+                              this.setState({ showOverlay: false })
+                            }} >
+                              Anonymisieren
+                            </Button>
+                          </OverlayBody>
+                        </Overlay>
+                      }
+                    </div>
+                  }
+                </>
               }
             </div>
           )
