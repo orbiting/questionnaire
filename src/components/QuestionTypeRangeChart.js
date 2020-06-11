@@ -28,7 +28,7 @@ const styles = {
   })
 }
 
-const isValueWithinBucket = (value, { x0, x1 }, isLast) =>
+const isValueWithinBin = (value, { x0, x1 }, isLast) =>
   Number.isFinite(value) &&
   value >= x0 &&
   (
@@ -91,14 +91,14 @@ class QuestionTypeRangeChart extends Component {
       // Paint augmented bin
       const augmentedBin =
         augmentedBins &&
-        augmentedBins.find(augmentedBin => isValueWithinBucket(augmentedBin.value, bin, index === histogram.length - 1))
+        augmentedBins.find(augmentedBin => isValueWithinBin(augmentedBin.value, bin, index === histogram.length - 1))
 
       if (augmentedBin) {
         return augmentedBin.color
       }
 
       // Add state.value to legend and paint as answer
-      if (isValueWithinBucket(value, bin, index === histogram.length - 1)) {
+      if (isValueWithinBin(value, bin, index === histogram.length - 1)) {
         legend.push({
           label: 'Ihre Position',
           color: this.colors.answer
