@@ -1,22 +1,20 @@
 import React, { Component } from 'react'
 
 import { css } from 'glamor'
-import { compose, graphql } from 'react-apollo'
+import { compose, graphql, withApollo } from 'react-apollo'
 import gql from 'graphql-tag'
-import CheckCircle from 'react-icons/lib/md/check-circle'
 import withT from '../lib/withT'
 import withMe from './Auth/withMe'
 import { errorToString } from '../lib/errors'
+import uuid from '../lib/uuid'
 
 import {
   colors,
-  Interaction,
   mediaQueries,
-  InlineSpinner,
+  Interaction,
   fontFamilies,
   fontStyles,
   Loader,
-  Editorial,
   A,
   Overlay,
   OverlayToolbar,
@@ -25,17 +23,34 @@ import {
   Button
 } from '@project-r/styleguide'
 
-import Question from './Question'
+import QuestionTypeChoice from './QuestionTypeChoice'
+import QuestionTypeRange from './QuestionTypeRange'
+
+const questionTypes = {
+  QuestionTypeChoice,
+  QuestionTypeRange
+}
 
 const { P } = Interaction
-const { Note } = Editorial
 
 const styles = {
+  container: css({
+    marginBottom: 60
+  }),
   count: css({
     background: '#fff',
     zIndex: 10,
     borderTop: `0.5px solid ${colors.divider}`,
     minHeight: 25
+  }),
+  actions: css({
+    ...fontStyles.sansSerifRegular18,
+    [mediaQueries.lUp]: {
+      display: 'flex'
+    }
+  }),
+  action: css({
+    marginRight: 20
   }),
   footer: css({
     ...fontStyles.sansSerifRegular18,
@@ -55,18 +70,15 @@ const styles = {
     margin: '40px 0'
 
   })
-
 }
 
-class Page extends Component {
+class Questionnaire extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      showResults: false,
       showOverlay: false
     }
-  }
-
-  render () {
 
     this.processSubmit = (fn, ...args) => {
       this.setState({ updating: true })
@@ -86,15 +98,84 @@ class Page extends Component {
         })
     }
 
-    this.createHandleChange = (question) => (answerId, value) => {
+    this.getPseudonym = () => {
+      if (this.props.me) {
+        return
+      }
+
+      try {
+        const currentStorageItem = localStorage.getItem('questionnaire')
+        const currentCache = currentStorageItem && JSON.parse(currentStorageItem)
+    
+        if (currentCache && currentCache.pseudonym) {
+          return currentCache.pseudonym
+        }
+    
+        const pseudonym = uuid()
+    
+        localStorage.setItem('questionnaire', JSON.stringify({
+          ...currentCache,
+          pseudonym
+        }))
+    
+        return pseudonym
+      } catch (e) {
+        console.log(e)
+        // Swallow error
+      }
+    
+      return uuid()
+    }
+
+    this.createHandleChange = (questionnaire, question) => (answerId, value) => {
       const payload = value !== null ? { value } : null
+      this.cacheUnattributedAnswer(
+        questionnaire,
+        question,
+        payload,
+        answerId
+      )
       this.processSubmit(
-        this.props.submitAnswer,
-        question, payload, answerId
+        this.props.me
+          ? this.props.submitAnswer
+          : this.props.submitAnswerUnattributed,
+        question,
+        payload,
+        answerId,
+        this.getPseudonym()
       )
     }
 
-    const { data, me, t, meta } = this.props
+    // Save state to local storage
+    this.cacheUnattributedAnswer = (questionnaire, question, payload, answerId) => {
+      try {
+        if (!this.props.me && questionnaire.unattributedAnswers) {
+          const currentStorageItem = localStorage.getItem(questionnaire.slug)
+          const currentCache = currentStorageItem && JSON.parse(currentStorageItem)
+
+          const updatedCache = {
+            ...currentCache,
+            questions: (currentCache && currentCache.questions) || new Array(questionnaire.questions.length)
+          }
+
+          updatedCache.questions[question.order] = {
+            userAnswer: {
+              __typename: 'Answer',
+              id: answerId,
+              payload
+            }
+          }
+
+          localStorage.setItem(questionnaire.slug, JSON.stringify(updatedCache))
+        }
+      } catch (e) {
+        /* Swallow errors */
+      }
+    }
+  }
+
+  render () {
+    const { data, me, t, hideAnonymize, settings } = this.props
 
     return (
       <Loader loading={data.loading} error={data.error} render={() => {
@@ -109,53 +190,83 @@ class Page extends Component {
           )
         }
 
-        if (!me || !me.id) {
+        const { questionnaire } = data
+        const { unattributedAnswers, questions, userHasSubmitted } = questionnaire
+
+        if ((!me || !me.id) && !unattributedAnswers) {
           return (
             <P {...styles.signIn}>Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen <A href="/anmelden">müssen Sie sich anmelden</A>. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder anonymisieren.</P>
           )
         }
 
         // handle questions
-        const { questionnaire } = data
-        const { questions, userHasSubmitted } = questionnaire
+        const { error, showResults, showOverlay } = this.state
 
-        const { error, submitting, updating, showOverlay } = this.state
-        const questionCount = questions.filter(Boolean).length
-        const userAnswerCount = questions.map(q => q.userAnswer).filter(Boolean).length
+        const questionsSet =
+          questions
+            .filter(q => {
+              const { hide } = settings && settings.find(s => s.order === q.order) || {}
+              return !hide
+            })
+
+        const questionCount = questionsSet
+          .filter(Boolean)
+          .length
+
+        const userAnswerCount = questionsSet
+          .map(q => q.userAnswer)
+          .filter(Boolean)
+          .length
+
+        const answersSubmitted = questionCount === userAnswerCount || userHasSubmitted
 
         return (
-          <div>
-            {
-              questions
-              //.slice(0, userHasSubmitted ? questionCount : userAnswerCount + 1)
-              .map(q =>
-                  React.createElement(
-                    Question,
-                    {
-                      onChange: this.createHandleChange(q),
-                      questionnaire,
-                      question: q,
-                      key: q.id
-                    }
-                  )
+          <div {...styles.container}>
+            {questionsSet.map(question =>
+              React.createElement(
+                questionTypes[question.__typename],
+                {
+                  unattributed: !me,
+                  showResults: answersSubmitted || showResults,
+                  ...settings && settings.find(s => s.order === question.order),
+                  onChange: this.createHandleChange(questionnaire, question),
+                  questionnaire,
+                  question,
+                  key: question.id
+                }
               )
-            }
-            <div {...styles.count}>
+            )}
+            <div {...questionCount > 1 && styles.count}>
               { error &&
                 <P {...styles.error}>{errorToString(error)}</P>
               }
-              <div style={{ display: 'flex' }}>
-                { userHasSubmitted
-                  ? <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P>
-                  : <P {...styles.footer}>{t('questionnaire/header', { questionCount, userAnswerCount })}</P>
+              { userHasSubmitted && <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P> }
+              { questionCount > 1 && (
+                <P {...styles.footer}>
+                  {t('questionnaire/header', { questionCount, userAnswerCount })}
+                </P>
+              ) }
+              { /* @TODO: Updating-Spinner */ }
+              <div {...styles.actions}>
+                { !showResults && !answersSubmitted &&
+                  <div {...styles.action}>
+                    <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showResults: true })}}>Nur Antworten von anderen anzeigen</A>
+                  </div>
                 }
-                { (updating || submitting) &&
-                  <div style={{ marginLeft: 5, marginTop: 10 }}><InlineSpinner size={24} /></div>
+                { showResults && !answersSubmitted &&
+                  <div {...styles.action}>
+                    <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showResults: false })}}>
+                      {questionCount > 1 ? 'Ihre Antworten übermitteln' : 'Ihre Antwort übermitteln'}
+                    </A>
+                  </div>
+                }
+                { !hideAnonymize && me && answersSubmitted && !userHasSubmitted &&
+                  <div {...styles.action}>
+                    <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Ihre Antworten anonymisieren</A>
+                  </div>
                 }
               </div>
-              { !userHasSubmitted &&
-                <P {...styles.footer} style={{ marginTop: 0 }}><A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Möchten Sie Ihre Antworten anonymisieren?</A></P>
-              }
+              <P {...styles.footer} style={{ marginTop: 0 }}></P>
               { showOverlay &&
                 <Overlay onClose={() => {this.setState({ showOverlay: false })}}>
                   <OverlayToolbar>
@@ -185,8 +296,33 @@ class Page extends Component {
   }
 }
 
+const mutationResult = `
+  ... on QuestionTypeChoice {
+    choiceResults: result {
+      count
+      option {
+        label
+        value
+        category
+      }
+    }
+  }
+  ... on QuestionTypeRange {
+    rangeResults: result {
+      histogram(ticks: $histogramTicks) {
+        x0
+        x1
+        count
+      }
+      mean
+      median
+      deviation
+    }
+  }
+`
+
 const submitAnswerMutation = gql`
-mutation submitAnswer($answerId: ID!, $questionId: ID!, $payload: JSON) {
+mutation submitAnswer($answerId: ID!, $questionId: ID!, $payload: JSON, $histogramTicks: Int) {
   submitAnswer(answer: {
     id: $answerId,
     questionId: $questionId,
@@ -198,18 +334,25 @@ mutation submitAnswer($answerId: ID!, $questionId: ID!, $payload: JSON) {
         id
         payload
       }
+      turnout { skipped submitted }
     }
-    ... on QuestionTypeChoice {
-      results: result {
-        count
-        option {
-          label
-          value
-          category
-        }
-      }
-      turnout {skipped submitted}
+    ${mutationResult}
+  }
+}
+`
+
+const submitAnswerUnattributedMutation = gql`
+mutation submitAnswerUnattributed($answerId: ID!, $questionId: ID!, $payload: JSON, $pseudonym: ID!, $histogramTicks: Int) {
+  submitAnswerUnattributed(answer: {
+    id: $answerId,
+    questionId: $questionId,
+    payload: $payload
+  } pseudonym: $pseudonym) {
+    ... on QuestionInterface {
+      id
+      turnout { skipped submitted }
     }
+    ${mutationResult}
   }
 }
 `
@@ -225,26 +368,27 @@ mutation anonymizeUserAnswers($questionnaireId: ID!) {
 }
 `
 
-
 const query = gql`
-query getQuestionnaire($slug: String!) {
+query getQuestionnaire($slug: String!, $histogramTicks: Int) {
   questionnaire(slug: $slug) {
     id
+    slug
     beginDate
-    endDate
     userHasSubmitted
-    userSubmitDate
-    userIsEligible
+    unattributedAnswers
     turnout { eligible submitted }
     questions {
+      __typename
       ... on QuestionInterface {
         id
-        order
         text
+        order
+        metadata
         userAnswer {
           id
           payload
         }
+        turnout { skipped submitted }
       }
       ... on QuestionTypeChoice {
         cardinality
@@ -253,7 +397,7 @@ query getQuestionnaire($slug: String!) {
           value
           category
         }
-        results: result {
+        choiceResults: result {
           count
           option {
             label
@@ -261,48 +405,95 @@ query getQuestionnaire($slug: String!) {
             category
           }
         }
-        turnout {skipped submitted}
+      }
+      ... on QuestionTypeRange {
+        kind
+        ticks {
+          label
+          value
+        }
+        rangeResults: result {
+          histogram(ticks: $histogramTicks) {
+            x0
+            x1
+            count
+          }
+          mean
+          median
+          deviation
+        }
       }
     }
   }
 }
 `
 
+const getOptimisticResponse = (mutationName, question, payload, answerId) => ({
+  __typename: 'Mutation',
+  [mutationName]: {
+    ...question,
+    userAnswer: {
+      __typename: 'Answer',
+      id: answerId,
+      payload
+    },
+
+    /* Update results of choice question type */
+    ...question.choiceResults && { choicesResults: question.choiceResults.map(r => ({
+      ...r,
+      count: r.count + (r.option.value == payload.value ? 1 : 0)
+    }))},
+
+    /* Update results of range question type */
+    ...question.rangeResults && { rangeResults: {
+      ...question.rangeResults,
+      histogram: question.rangeResults.histogram.map(b => {
+        if (payload.value >= b.x0 && payload.value < b.x1) {
+          return { ...b, count: b.count + 1 }
+        }
+
+        return b
+      })
+    }},
+
+    turnout: {
+      ...question.turnout,
+      submitted: question.turnout.submitted + 1
+    }
+  }
+})
+
 export default compose(
+  withApollo,
   withT,
   withMe,
   graphql(submitAnswerMutation, {
-    props: ({ mutate, ownProps: { slug } }) => ({
+    props: ({ mutate, ownProps: { histogramTicks } }) => ({
       submitAnswer: (question, payload, answerId) => {
         return mutate({
           variables: {
             answerId,
             questionId: question.id,
-            payload
+            payload,
+            histogramTicks
           },
-          optimisticResponse: {
-            __typename: 'Mutation',
-            submitAnswer: {
-              __typename: 'QuestionTypeChoice',
-              id: question.id,
-              userAnswer: {
-                __typename: 'Answer',
-                id: answerId,
-                payload
-              },
-              results: question.results.map(r => ({
-                ...r,
-                count: r.count + (r.option.value == payload.value
-                  ? 1
-                  : 0
-                )
-              })),
-              turnout: {
-                ...question.turnout,
-                submitted: question.turnout.submitted + 1
-              }
-            }
-          }
+          optimisticResponse: getOptimisticResponse('submitAnswer', question, payload, answerId)
+        })
+      }
+    })
+  }),
+  graphql(submitAnswerUnattributedMutation, {
+    props: ({ mutate, ownProps: { histogramTicks } }) => ({
+      submitAnswerUnattributed: (question, payload, answerId, pseudonym) => {
+        return mutate({
+          variables: {
+            answerId,
+            questionId: question.id,
+            payload,
+            pseudonym,
+            histogramTicks
+          },
+          optimisticResponse: getOptimisticResponse('submitAnswerUnattributed', question, payload, answerId)
         })
       }
     })
@@ -320,9 +511,38 @@ export default compose(
     })
   }),
   graphql(query, {
-    options: ({ slug }) => ({
-      pollInterval: 4000,
-      variables: { slug }
+    options: ({ slug, pollInterval = 0, histogramTicks, me, client }) => ({
+      pollInterval,
+      variables: { slug, histogramTicks },
+      onCompleted: data => {
+        try {
+          if (!me && data.questionnaire && data.questionnaire.unattributedAnswers) {
+            const currentStorageItem = localStorage.getItem(slug)
+            const currentCache = currentStorageItem && JSON.parse(currentStorageItem)
+
+            if (currentCache && currentCache.questions) {
+              const updatedData = {
+                ...data,
+                questionnaire: {
+                  ...data.questionnaire,
+                  questions: data.questionnaire.questions.map((question, order) => {
+                    const cachedQuestion = currentCache.questions[order]
+
+                    return {
+                      ...question,
+                      ...cachedQuestion
+                    }
+                  })
+                }
+              }
+
+              client.writeQuery({ query, variables: { slug }, data: updatedData })
+            }
+          }
+        } catch (e) {
+          // Swallow error
+        }
+      }
     })
   })
-)(Page)
+)(Questionnaire)

@@ -5,14 +5,11 @@ import uuid from '../lib/uuid'
 import {
   Interaction,
   Button,
-  fontStyles,
-  fontFamilies,
-  colors,
   mediaQueries
 } from '@project-r/styleguide'
-const { H2, H3, P } = Interaction
+const { P } = Interaction
 import withT from '../lib/withT'
-import Chart from './Chart'
+import Chart from './QuestionTypeChoiceChart'
 
 const styles = {
   container: css({
@@ -39,9 +36,7 @@ const styles = {
   }),
 }
 
-
-
-class ChoiceQuestion extends Component {
+class QuestionTypeChoice extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -70,7 +65,7 @@ class ChoiceQuestion extends Component {
       onChange(answerId, Array.from(nextValue))
     }
 
-    const { questionnaire, question: { id, text, userAnswer, options, results } } = this.props
+    const { questionnaire, question: { id, text, userAnswer, options, choiceResults: results }, showResults } = this.props
     const { question } = this.props
 	  const { userHasSubmitted } = questionnaire
 
@@ -78,12 +73,12 @@ class ChoiceQuestion extends Component {
       <div {...styles.container}>
         <P {...styles.question}>{text}</P>
         <div {...styles.content}>
-          { (userAnswer || userHasSubmitted) &&
+          { (userAnswer || userHasSubmitted || showResults) &&
             <div {...styles.mobileBorder}>
               <Chart question={question} />
             </div>
           }
-          { (!userAnswer && !userHasSubmitted) &&
+          { (!userAnswer && !userHasSubmitted && !showResults) &&
             <div {...styles.buttons}>
               { options.map(option =>
                 <div key={`${id}-${option.value}`}>
@@ -100,4 +95,4 @@ class ChoiceQuestion extends Component {
   }
 }
 
-export default withT(ChoiceQuestion)
+export default withT(QuestionTypeChoice)

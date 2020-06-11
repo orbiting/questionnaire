@@ -1,12 +1,8 @@
 import React, { Component } from 'react'
 import {
-  Interaction,
-  Button,
-  fontStyles,
   fontFamilies,
   colors
 } from '@project-r/styleguide'
-const { H2, H3, P } = Interaction
 import { css } from 'glamor'
 import CheckCircle from 'react-icons/lib/md/check-circle'
 
@@ -70,10 +66,11 @@ const styles = {
 class Chart extends Component {
   render () {
     const { question } = this.props
-    if (!question || !question.results) {
-      return
+    if (!question || !question.choiceResults) {
+      return null
     }
-    const { turnout: { submitted }, results, userAnswer } = question
+
+    const { turnout: { submitted }, choiceResults: results, userAnswer } = question
     const trueResult = results.find( r => r.option.value == 'true')
     const falseResult = results.find( r => r.option.value == 'false')
     const userAnswerTrue = userAnswer && userAnswer.payload.value[0] == 'true'
