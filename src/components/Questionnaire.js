@@ -72,6 +72,27 @@ const styles = {
   })
 }
 
+const getCache = key => {
+  try {
+    const payload = localStorage.getItem(key)
+    return JSON.parse(payload)
+  } catch (e) {
+    // Swallow error
+  }
+
+  return
+}
+
+const setCache = (key, payload) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(payload))
+  } catch (e) {
+    // Swallow error
+  }
+
+  return payload
+}
+
 class Questionnaire extends Component {
   constructor (props) {
     super(props)
@@ -99,32 +120,21 @@ class Questionnaire extends Component {
     }
 
     this.getPseudonym = () => {
-      if (this.props.me) {
+      if (props.me) {
         return
       }
 
-      try {
-        const currentStorageItem = localStorage.getItem('questionnaire')
-        const currentCache = currentStorageItem && JSON.parse(currentStorageItem)
-    
-        if (currentCache && currentCache.pseudonym) {
-          return currentCache.pseudonym
-        }
-    
-        const pseudonym = uuid()
-    
-        localStorage.setItem('questionnaire', JSON.stringify({
-          ...currentCache,
-          pseudonym
-        }))
-    
-        return pseudonym
-      } catch (e) {
-        console.log(e)
-        // Swallow error
+      const cache = getCache('questionnaire')
+
+      if (cache && cache.pseudonym) {
+        return cache.pseudonym
       }
-    
-      return uuid()
+
+      const pseudonym = uuid()
+
+      setCache('questionnaire', { ...cache, pseudonym })
+
+      return pseudonym
     }
 
     this.createHandleChange = (questionnaire, question) => (answerId, value) => {
@@ -136,9 +146,9 @@ class Questionnaire extends Component {
         answerId
       )
       this.processSubmit(
-        this.props.me
-          ? this.props.submitAnswer
-          : this.props.submitAnswerUnattributed,
+        props.me
+          ? props.submitAnswer
+          : props.submitAnswerUnattributed,
         question,
         payload,
         answerId,
@@ -148,28 +158,23 @@ class Questionnaire extends Component {
 
     // Save state to local storage
     this.cacheUnattributedAnswer = (questionnaire, question, payload, answerId) => {
-      try {
-        if (!this.props.me && questionnaire.unattributedAnswers) {
-          const currentStorageItem = localStorage.getItem(questionnaire.slug)
-          const currentCache = currentStorageItem && JSON.parse(currentStorageItem)
+      if (!props.me && questionnaire.unattributedAnswers) {
+        const cache = getCache(questionnaire.slug)
 
-          const updatedCache = {
-            ...currentCache,
-            questions: (currentCache && currentCache.questions) || new Array(questionnaire.questions.length)
-          }
-
-          updatedCache.questions[question.order] = {
-            userAnswer: {
-              __typename: 'Answer',
-              id: answerId,
-              payload
-            }
-          }
-
-          localStorage.setItem(questionnaire.slug, JSON.stringify(updatedCache))
+        const updatedCache = {
+          ...cache,
+          questions: (cache && cache.questions) || new Array(questionnaire.questions.length)
         }
-      } catch (e) {
-        /* Swallow errors */
+
+        updatedCache.questions[question.order] = {
+          userAnswer: {
+            __typename: 'Answer',
+            id: answerId,
+            payload
+          }
+        }
+
+        setCache(questionnaire.slug, updatedCache)
       }
     }
   }
@@ -246,7 +251,6 @@ class Questionnaire extends Component {
                   {t('questionnaire/header', { questionCount, userAnswerCount })}
                 </P>
               ) }
-              { /* @TODO: Updating-Spinner */ }
               <div {...styles.actions}>
                 { !showResults && !answersSubmitted &&
                   <div {...styles.action}>
@@ -374,6 +378,7 @@ query getQuestionnaire($slug: String!, $histogramTicks: Int) {
     id
     slug
     beginDate
+    userIsEligible
     userHasSubmitted
     unattributedAnswers
     turnout { eligible submitted }
@@ -407,7 +412,6 @@ query getQuestionnaire($slug: String!, $histogramTicks: Int) {
         }
       }
       ... on QuestionTypeRange {
-        kind
         ticks {
           label
           value
@@ -511,36 +515,29 @@ export default compose(
     })
   }),
   graphql(query, {
-    options: ({ slug, pollInterval = 0, histogramTicks, me, client }) => ({
+    options: ({ slug, pollInterval = 0, histogramTicks, client }) => ({
       pollInterval,
       variables: { slug, histogramTicks },
-      onCompleted: data => {
-        try {
-          if (!me && data.questionnaire && data.questionnaire.unattributedAnswers) {
-            const currentStorageItem = localStorage.getItem(slug)
-            const currentCache = currentStorageItem && JSON.parse(currentStorageItem)
+      onCompleted: (data) => {
+        // Merge cached data into query cache if user is not eligable to submit and
+        // unattributed answers are allowed.
+        if (data.questionnaire && !data.questionnaire.userIsEligible && data.questionnaire.unattributedAnswers) {
+          const cache = getCache(slug)
 
-            if (currentCache && currentCache.questions) {
-              const updatedData = {
-                ...data,
-                questionnaire: {
-                  ...data.questionnaire,
-                  questions: data.questionnaire.questions.map((question, order) => {
-                    const cachedQuestion = currentCache.questions[order]
-
-                    return {
-                      ...question,
-                      ...cachedQuestion
-                    }
-                  })
-                }
+          if (cache && cache.questions) {
+            const updatedData = {
+              ...data,
+              questionnaire: {
+                ...data.questionnaire,
+                questions: data.questionnaire.questions.map((question, order) => ({
+                  ...question,
+                  ...cache.questions[order]
+                }))
               }
-
-              client.writeQuery({ query, variables: { slug }, data: updatedData })
             }
+
+            client.writeQuery({ query, variables: { slug }, data: updatedData })
           }
-        } catch (e) {
-          // Swallow error
         }
       }
     })

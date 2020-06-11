@@ -5,8 +5,6 @@ import { css, merge } from 'glamor'
 import { Label, colors, mediaQueries } from '@project-r/styleguide'
 import { Chart } from '@project-r/styleguide/chart'
 
-import withT from '../lib/withT'
-
 const styles = {
   chartLegend: css({
     display: 'flex',
@@ -29,6 +27,14 @@ const styles = {
     marginBottom: 20
   })
 }
+
+const isValueWithinBucket = (value, { x0, x1 }, isLast) =>
+  Number.isFinite(value) &&
+  value >= x0 &&
+  (
+    (!isLast && value < x1) ||
+    (isLast && value <= x1)
+  )
 
 class QuestionTypeRangeChart extends Component {
   constructor(props) {
@@ -56,7 +62,7 @@ class QuestionTypeRangeChart extends Component {
   }
 
   render () {
-    const { question, buckets, t } = this.props
+    const { question, augmentedBins } = this.props
     if (!question || !question.rangeResults) {
       return null
     }
@@ -66,39 +72,33 @@ class QuestionTypeRangeChart extends Component {
 
     const value = userAnswer && userAnswer.payload && userAnswer.payload.value
 
-    const legend = (buckets && buckets.filter(b => b.label).map(b => ({
-      label: b.label,
-      color: b.color
-    }))) || []
+    const legend = (
+      augmentedBins &&
+      augmentedBins
+        .filter(ab => ab.label)
+        .map(ab => ({
+          label: ab.label,
+          color: ab.color
+        }))
+    ) || []
 
-    const values = histogram.map((bucket, index) => ({ time: index + 1, value: '1' }))
+    const values = histogram.map((_, index) => ({ time: index + 1, value: '1' }))
 
     const max = histogram.reduce((prev, curr) => curr.count !== 0 && curr.count > prev.count ? curr : prev)
     const min = histogram.reduce((prev, curr) => curr.count !== 0 && curr.count < prev.count ? curr : prev)
 
-    const colorRange = histogram.map((bucket, index) => {
-      const augmentedBucket = buckets && buckets.find(({ value }) =>
-        Number.isFinite(value) &&
-        value >= bucket.x0 &&
-        (
-          (index !== histogram.length - 1 && value < bucket.x1) || // Not last bucket
-          (index === histogram.length - 1 && value <= bucket.x1) // Last bucket
-        )
-      )
+    const colorRange = histogram.map((bin, index) => {
+      // Paint augmented bin
+      const augmentedBin =
+        augmentedBins &&
+        augmentedBins.find(augmentedBin => isValueWithinBucket(augmentedBin.value, bin, index === histogram.length - 1))
 
-      if (augmentedBucket) {
-        return augmentedBucket.color
+      if (augmentedBin) {
+        return augmentedBin.color
       }
 
-      // «Meine Antwort»
-      if (
-        Number.isFinite(value) &&
-        value >= bucket.x0 &&
-        (
-          (index !== histogram.length - 1 && value < bucket.x1) || // Not last bucket
-          (index === histogram.length - 1 && value <= bucket.x1) // Last bucket
-        )
-      ) {
+      // Add state.value to legend and paint as answer
+      if (isValueWithinBucket(value, bin, index === histogram.length - 1)) {
         legend.push({
           label: 'Ihre Position',
           color: this.colors.answer
@@ -107,13 +107,15 @@ class QuestionTypeRangeChart extends Component {
         return this.colors.answer
       }
 
-      // Paint bucket w/ count = 0 in lowester color
-      if (bucket.count === 0) {
+      // Paint bucket w/ count = 0 
+      if (bin.count === 0) {
         return this.colors.empty
       }
 
-      // Return color on specturm
-      return this.getRangeColor((1 / (max.count - min.count) * (bucket.count - min.count) || 1))
+      // Paint bin w/ range color
+      // transpose value between 0 and 1
+      const relativeValue = 1 / (max.count - min.count) * (bin.count - min.count)
+      return this.getRangeColor(relativeValue || 1)
     })
 
     return (
@@ -161,4 +163,4 @@ class QuestionTypeRangeChart extends Component {
   }
 }
 
-export default withT(QuestionTypeRangeChart)
+export default QuestionTypeRangeChart

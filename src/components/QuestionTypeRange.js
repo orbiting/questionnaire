@@ -7,7 +7,6 @@ import { Button, Interaction, Label, colors } from '@project-r/styleguide'
 const { P } = Interaction
 
 import uuid from '../lib/uuid'
-import withT from '../lib/withT'
 import Slider from './Base/Slider'
 import Chart from './QuestionTypeRangeChart'
 
@@ -32,7 +31,20 @@ class QuestionTypeRange extends Component {
   constructor (props) {
     super(props)
 
-    const { question: { userAnswer, ticks }, showResults, slider } = props
+    const { questionnaire, question: { userAnswer, ticks }, showResults, slider, onChange } = props
+
+    const userAnswerValue = (
+      userAnswer &&
+      userAnswer.payload &&
+      userAnswer.payload.value
+    )
+
+    this.state = {
+      value: userAnswerValue || undefined,
+      answerId: (userAnswer && userAnswer.id) || uuid(),
+      submitted: !!userAnswerValue,
+      showResults
+    }
 
     this.colors = {
       track: colors.secondaryBg,
@@ -44,41 +56,28 @@ class QuestionTypeRange extends Component {
       last: ticks[ticks.length - 1]
     }
 
+    // Set set to slider 
     this.step = (slider && slider.step) || (this.ticks.last.value - this.ticks.first.value) / 100
 
-    const userAnswerValue = (
-      userAnswer &&
-      userAnswer.payload &&
-      userAnswer.payload.value
-    )
-
-    this.state = {
-      value: userAnswerValue || undefined,
-      answerId: (props.question.userAnswer && props.question.userAnswer.id) || uuid(),
-      submitted: !!userAnswerValue,
-      showResults
-    }
-
+    // Retrieve intial value for question in config slider.inital.path
     this.getInitialValue = () => {
       return get(
-        this.props.questionnaire.questions, 
-        this.props.slider && this.props.slider.initial && this.props.slider.initial.path
+        questionnaire.questions, 
+        slider && slider.initial && slider.initial.path
       )
     }
 
+    // Retrieve value for slider; either state itself, initial value or halway between question ticks.
     this.getSliderValue = () => {
       return Number.isFinite(this.state.value)
         ? this.state.value
-        : (this.getInitialValue() || (this.ticks.last.value - this.ticks.first.value) / 2 || 0.5)
+        : (this.getInitialValue() || (this.ticks.last.value - this.ticks.first.value) / 2 || 0)
     }
 
     this.submitValue = () => {
       this.setState(
         { submitted: true },
-        () => {
-          const { answerId } = this.state
-          this.props.onChange(answerId, this.getSliderValue())
-        }
+        () => onChange(this.state.answerId, this.getSliderValue())
       )
     }
   }
@@ -88,16 +87,18 @@ class QuestionTypeRange extends Component {
     const { value, submitted } = this.state
     const { text } = question
 
-    const buckets = augments && augments.map(augment => {
-      const value = get(questionnaire.questions, augment.path)
+    // Create bins for chart w/ augments configs
+    const augmentedBins = augments && augments.map(config => {
+      const value = get(questionnaire.questions, config.path)
 
+      // If value can't be retrieved, skip early
       if (!Number.isFinite(value)) {
         return
       }
 
       return {
-        label: augment.label,
-        color: augment.color,
+        label: config.label,
+        color: config.color,
         value
       }
     }).filter(Boolean)
@@ -149,7 +150,7 @@ class QuestionTypeRange extends Component {
           {(submitted || showResults) &&
             <Chart
               question={question}
-              buckets={buckets}
+              augmentedBins={augmentedBins}
               colors={this.colors} />
           }
         </div>
@@ -158,4 +159,4 @@ class QuestionTypeRange extends Component {
   }
 }
 
-export default withT(QuestionTypeRange)
+export default QuestionTypeRange
