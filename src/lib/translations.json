@@ -2,7 +2,7 @@
   "data": [
     {
       "key": "questionnaire/header",
-      "value": "Sie haben {userAnswerCount} von {questionCount} Fragen beantwortet."
+      "value": "{userAnswerCount} von {questionCount} Fragen beantwortet"
     },
     {
       "key": "questionnaire/invalid",
