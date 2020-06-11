@@ -27,6 +27,60 @@ export const dataIdFromObject = object => {
   return null
 }
 
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData: {
+    __schema: {
+      types: [
+        {
+          kind: 'UNION',
+          name: 'Reward',
+          possibleTypes: [
+            {
+              name: 'Goodie'
+            },
+            {
+              name: 'MembershipType'
+            }
+          ]
+        },
+        {
+          kind: 'INTERFACE',
+          name: 'QuestionInterface',
+          possibleTypes: [
+            {
+              name: 'QuestionTypeText'
+            },
+            {
+              name: 'QuestionTypeChoice'
+            },
+            {
+              name: 'QuestionTypeRange'
+            },
+            {
+              name: 'QuestionTypeDocument'
+            }
+          ]
+        },
+        {
+          kind: 'INTERFACE',
+          name: 'PlayableMedia',
+          possibleTypes: [
+            {
+              name: 'AudioSource'
+            },
+            {
+              name: 'VimeoEmbed'
+            },
+            {
+              name: 'YoutubeEmbed'
+            }
+          ]
+        }
+      ]
+    }
+  }
+})
+
 const hasSubscriptionOperation = ({ query: { definitions } }) =>
   definitions.some(
     ({ kind, operation }) =>
@@ -60,6 +114,7 @@ function create (initialState = {}, headers = {}) {
   return new ApolloClient({
     connectToDevTools: process.browser,
     cache: new InMemoryCache({
+      fragmentMatcher,
       dataIdFromObject
     }).restore(initialState || {}),
     ssrMode: !process.browser, // Disables forceFetch on the server (so queries are only run once)
