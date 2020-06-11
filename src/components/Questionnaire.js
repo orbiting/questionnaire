@@ -120,7 +120,7 @@ class Questionnaire extends Component {
     }
 
     this.getPseudonym = () => {
-      if (props.me) {
+      if (this.props.me) {
         return
       }
 
@@ -145,10 +145,11 @@ class Questionnaire extends Component {
         payload,
         answerId
       )
+
       this.processSubmit(
-        props.me
-          ? props.submitAnswer
-          : props.submitAnswerUnattributed,
+        this.props.me
+          ? this.props.submitAnswer
+          : this.props.submitAnswerUnattributed,
         question,
         payload,
         answerId,
@@ -158,7 +159,7 @@ class Questionnaire extends Component {
 
     // Save state to local storage
     this.cacheUnattributedAnswer = (questionnaire, question, payload, answerId) => {
-      if (!props.me && questionnaire.unattributedAnswers) {
+      if (!this.props.me && questionnaire.unattributedAnswers) {
         const cache = getCache(questionnaire.slug)
 
         const updatedCache = {
