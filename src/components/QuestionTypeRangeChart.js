@@ -115,7 +115,7 @@ class QuestionTypeRangeChart extends Component {
       // Paint bin w/ range color
       // transpose value between 0 and 1
       const relativeValue = 1 / (max.count - min.count) * (bin.count - min.count)
-      return this.getRangeColor(relativeValue || 1)
+      return Number.isFinite(relativeValue) ? this.getRangeColor(relativeValue) : this.getRangeColor(1)
     })
 
     return (
