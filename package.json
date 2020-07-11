@@ -71,6 +71,7 @@
   },
   "dependencies": {
     "d3-geo": "^1.11.6",
+    "d3-scale-cluster": "^2.0.1",
     "randombytes": "^2.1.0",
     "react-icons": "^2.2.7",
     "scroll-into-view": "^1.9.7"

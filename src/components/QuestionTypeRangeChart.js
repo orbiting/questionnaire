@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react'
+import scaleCluster from 'd3-scale-cluster'
 import { interpolate } from 'd3-interpolate'
 import { css, merge } from 'glamor'
 
@@ -87,6 +88,11 @@ class QuestionTypeRangeChart extends Component {
     const max = histogram.reduce((prev, curr) => curr.count !== 0 && curr.count > prev.count ? curr : prev)
     const min = histogram.reduce((prev, curr) => curr.count !== 0 && curr.count < prev.count ? curr : prev)
 
+    const getRangeColorCustered = this.colors.clusters &&
+      scaleCluster()
+        .domain(histogram.map(bin => bin.count))
+        .range(this.colors.clusters)
+
     const colorRange = histogram.map((bin, index) => {
       // Paint augmented bin
       const augmentedBin =
@@ -107,6 +113,10 @@ class QuestionTypeRangeChart extends Component {
         return this.colors.answer
       }
 
+      if (getRangeColorCustered) {
+        return getRangeColorCustered(bin.count)
+      }
+
       // Paint bucket w/ count = 0 
       if (bin.count === 0) {
         return this.colors.empty
@@ -116,6 +126,7 @@ class QuestionTypeRangeChart extends Component {
       // transpose value between 0 and 1
       const relativeValue = 1 / (max.count - min.count) * (bin.count - min.count)
       return Number.isFinite(relativeValue) ? this.getRangeColor(relativeValue) : this.getRangeColor(1)
+
     })
 
     return (
