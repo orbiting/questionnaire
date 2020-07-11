@@ -1,13 +1,13 @@
 ---
-twitterTitle: 'Wenn Männner über Männer reden, reden Männer Männern nach'
+twitterTitle: "Wenn Männner über Männer reden, reden Männer Männern nach"
 twitterDescription: >-
   Schluss mit Scheinargumenten: Sprache, die nur Männer sichtbar macht, hat
   reale Konsequenzen – nicht nur für Frauen.
 slug: wenn-maennner-ueber-maenner-reden-reden-maenner-maennern-nach
-subject: ''
-facebookTitle: 'Wenn Männner über Männer reden, reden Männer Männern nach'
+subject: ""
+facebookTitle: "Wenn Männner über Männer reden, reden Männer Männern nach"
 gallery: false
-title: 'Wenn Männner über Männer reden, reden Männer Männern nach'
+title: "Wenn Männner über Männer reden, reden Männer Männern nach"
 template: article
 image: images/3e6f56832f7dafe58f2e10edffeb908423a50122.jpeg?size=1500x750
 description: >-
@@ -48,6 +48,7 @@ Starten wir mit einem Stimmungsbild:
           "empty": "#ffffff",
           "min": "#FBFBFB",
           "max": "#EBECEB",
+          "clusters": ["#fbfbfb", "#f7f7f7", "#f3f3f3", "#efefef", "#eaeaea", "#e6e6e6", "#e2e2e2", "#dedede", "#dadada", "#d6d6d6"],
           "answer": "#048e02"
         },
         "slider": {
@@ -98,6 +99,7 @@ Kommen wir zum Schluss nochmals auf das Stimmungs­bild zurück: Hat sich etwas 
           "empty": "#ffffff",
           "min": "#FBFBFB",
           "max": "#EBECEB",
+          "clusters": ["#fbfbfb", "#f7f7f7", "#f3f3f3", "#efefef", "#eaeaea", "#e6e6e6", "#e2e2e2", "#dedede", "#dadada", "#d6d6d6"],
           "answer": "#048e02"
         },
         "slider": {
