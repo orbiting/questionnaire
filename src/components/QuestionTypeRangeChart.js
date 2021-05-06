@@ -1,10 +1,11 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component, Fragment, useContext } from 'react'
 import scaleCluster from 'd3-scale-cluster'
 import { interpolate } from 'd3-interpolate'
 import { css, merge } from 'glamor'
 
 import { Label, colors, mediaQueries } from '@project-r/styleguide'
 import { Chart } from '@project-r/styleguide/chart'
+import { withTranslations } from '../lib/TranslationsContext'
 
 const styles = {
   chartLegend: css({
@@ -63,7 +64,8 @@ class QuestionTypeRangeChart extends Component {
   }
 
   render () {
-    const { question, augmentedBins } = this.props
+    const { question, augmentedBins, t } = this.props
+
     if (!question || !question.rangeResults) {
       return null
     }
@@ -79,7 +81,8 @@ class QuestionTypeRangeChart extends Component {
         .filter(ab => ab.label)
         .map(ab => ({
           label: ab.label,
-          color: ab.color
+          color: ab.color,
+          value: Math.round(ab.value)
         }))
     ) || []
 
@@ -106,7 +109,7 @@ class QuestionTypeRangeChart extends Component {
       // Add state.value to legend and paint as answer
       if (isValueWithinBin(value, bin, index === histogram.length - 1)) {
         legend.push({
-          label: 'Ihre Position',
+          label: t('questionnaire/question/range/answer'),
           color: this.colors.answer
         })
 
@@ -133,11 +136,11 @@ class QuestionTypeRangeChart extends Component {
       <>
         {/* Legend */}
         <div {...styles.chartLegend}>
-          {legend.map(({ label, color }, index) => (
+          {legend.map(({ label, color, value }, index) => (
             <Fragment key={`label-${index}`}>
               <div {...merge(styles.chartLegendColorSample, { backgroundColor: color })} />
               <div {...styles.chartLegendLabel}>
-                <Label style={{ color }}>{label}</Label>
+                <Label style={{ color }}>{t(label, { value }, label)}</Label>
               </div>
             </Fragment>
           ))}
@@ -174,4 +177,4 @@ class QuestionTypeRangeChart extends Component {
   }
 }
 
-export default QuestionTypeRangeChart
+export default withTranslations(QuestionTypeRangeChart)

@@ -3,10 +3,12 @@ import React, { Component } from 'react'
 import { css } from 'glamor'
 import { compose, graphql, withApollo } from 'react-apollo'
 import gql from 'graphql-tag'
-import withT from '../lib/withT'
+
 import withMe from './Auth/withMe'
+
 import { errorToString } from '../lib/errors'
 import uuid from '../lib/uuid'
+import { withTranslations } from '../lib/TranslationsContext'
 
 import {
   colors,
@@ -191,7 +193,7 @@ class Questionnaire extends Component {
         if (!data.questionnaire || new Date(data.questionnaire.beginDate) > now) {
           return (
             <P {...styles.error}>
-              Der Fragebogen konnte nicht gefunden werden.
+              {t('questionnaire/notFound')}
             </P>
           )
         }
@@ -201,7 +203,7 @@ class Questionnaire extends Component {
 
         if ((!me || !me.id) && !unattributedAnswers) {
           return (
-            <P {...styles.signIn}>Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen <A href="/anmelden">müssen Sie sich anmelden</A>. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder anonymisieren.</P>
+            <P {...styles.signIn}>{t('questionnaire/noUnattributedAnswers')}</P>
           )
         }
 
@@ -246,7 +248,7 @@ class Questionnaire extends Component {
               { error &&
                 <P {...styles.error}>{errorToString(error)}</P>
               }
-              { userHasSubmitted && <P {...styles.footer}>Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen.</P> }
+              { userHasSubmitted && <P {...styles.footer}>{t('questionnaire/anon/submittedAlready')}</P> }
               { questionCount > 1 && (
                 <P {...styles.footer}>
                   {t('questionnaire/header', { questionCount, userAnswerCount })}
@@ -255,19 +257,19 @@ class Questionnaire extends Component {
               <div {...styles.actions}>
                 { !showResults && !answersSubmitted &&
                   <div {...styles.action}>
-                    <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showResults: true })}}>Nur Antworten von anderen anzeigen</A>
+                    <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showResults: true })}}>{t('questionnaire/preview')}</A>
                   </div>
                 }
                 { showResults && !answersSubmitted &&
                   <div {...styles.action}>
                     <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showResults: false })}}>
-                      {questionCount > 1 ? 'Ihre Antworten übermitteln' : 'Ihre Antwort übermitteln'}
+                      {t.pluralize('questionnaire/submit', { count: questionCount })}
                     </A>
                   </div>
                 }
                 { !hideAnonymize && me && answersSubmitted && !userHasSubmitted &&
                   <div {...styles.action}>
-                    <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>Ihre Antworten anonymisieren</A>
+                    <A href='#' onClick={(e) => {e.preventDefault(); this.setState({ showOverlay: true })}}>{t('questionnaire/anon/intent')}</A>
                   </div>
                 }
               </div>
@@ -279,7 +281,8 @@ class Questionnaire extends Component {
                   </OverlayToolbar>
 
                   <OverlayBody>
-                    <P>Wenn Sie möchten, können Sie Ihre Antworten anonymisieren. Diese bleiben zwar in unserer Datenbank erhalten, aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen, was Sie geantwortet haben, und Sie können keine Antworten mehr abgeben.</P>
+                    <P>
+                      {t('questionnaire/anon/info')}</P>
                     <Button style={{ marginTop: 10 }} onClick={(e) => {
                       e.preventDefault()
                       this.processSubmit(
@@ -288,7 +291,7 @@ class Questionnaire extends Component {
                       )
                       this.setState({ showOverlay: false })
                     }} >
-                      Anonymisieren
+                      {t('questionnaire/anon/submit')}
                     </Button>
                   </OverlayBody>
                 </Overlay>
@@ -470,8 +473,8 @@ const getOptimisticResponse = (mutationName, question, payload, answerId) => ({
 
 export default compose(
   withApollo,
-  withT,
   withMe,
+  withTranslations,
   graphql(submitAnswerMutation, {
     props: ({ mutate, ownProps: { histogramTicks } }) => ({
       submitAnswer: (question, payload, answerId) => {

@@ -8,7 +8,9 @@ import {
   mediaQueries
 } from '@project-r/styleguide'
 const { P } = Interaction
-import withT from '../lib/withT'
+
+import { withTranslations } from '../lib/TranslationsContext'
+
 import Chart from './QuestionTypeChoiceChart'
 
 const styles = {
@@ -95,4 +97,4 @@ class QuestionTypeChoice extends Component {
   }
 }
 
-export default withT(QuestionTypeChoice)
+export default withTranslations(QuestionTypeChoice)

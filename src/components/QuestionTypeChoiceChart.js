@@ -6,6 +6,8 @@ import {
 import { css } from 'glamor'
 import CheckCircle from 'react-icons/lib/md/check-circle'
 
+import { withTranslations } from '../lib/TranslationsContext'
+
 const HEIGHT = 64
 const BAR_HEIGHT = 32
 const CIRCLE_SIZE = 22
@@ -65,7 +67,7 @@ const styles = {
 
 class Chart extends Component {
   render () {
-    const { question } = this.props
+    const { question, t } = this.props
     if (!question || !question.choiceResults) {
       return null
     }
@@ -87,7 +89,7 @@ class Chart extends Component {
     return (
       <div style={{ width: '100%' }}>
         <div {...styles.labels} style={{ justifyContent: 'space-around' }}>
-          <label>{submitted} {submitted === 1 ? 'Stimme' : 'Stimmen'}</label>
+          <label>{t.pluralize('questionnaire/question/choice/votes', { count: submitted })}</label>
         </div>
         <div {...styles.bars}>
           <div {...styles.left}>
@@ -99,7 +101,7 @@ class Chart extends Component {
               textAlign: 'left',
             }}>
               <span style={{ marginLeft: userAnswerTrue ? -CIRCLE_SIZE : 0 }}>
-                <label {...styles.barLabel}>Ja {truePercent}%</label>
+                <label {...styles.barLabel}>{t('questionnaire/question/choice/true', { value: truePercent })}</label>
                 { userAnswerTrue &&
                   <CheckCircle {...styles.userAnswerIcon} size={CIRCLE_SIZE} color={colors.primary} />
                 }
@@ -114,7 +116,7 @@ class Chart extends Component {
               textAlign: 'right',
             }}>
               <span style={{ marginRight: userAnswerFalse ? -CIRCLE_SIZE : 0 }}>
-                <label {...styles.barLabel}>Nein {falsePercent}%</label>
+                <label {...styles.barLabel}>{t('questionnaire/question/choice/false', { value: falsePercent })}</label>
                 { userAnswerFalse &&
                   <CheckCircle {...styles.userAnswerIcon} size={CIRCLE_SIZE} color={colors.primary} />
                 }
@@ -132,4 +134,4 @@ class Chart extends Component {
   }
 }
 
-export default Chart
+export default withTranslations(Chart)

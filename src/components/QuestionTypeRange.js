@@ -7,6 +7,8 @@ import { Button, Interaction, Label, colors } from '@project-r/styleguide'
 const { P } = Interaction
 
 import uuid from '../lib/uuid'
+import { withTranslations } from '../lib/TranslationsContext'
+
 import Slider from './Base/Slider'
 import Chart from './QuestionTypeRangeChart'
 
@@ -83,7 +85,7 @@ class QuestionTypeRange extends Component {
   }
 
   render () {
-    const { questionnaire, question, showResults, augments } = this.props
+    const { questionnaire, question, showResults, augments, t } = this.props
     const { value, submitted } = this.state
     const { text } = question
 
@@ -104,7 +106,7 @@ class QuestionTypeRange extends Component {
     }).filter(Boolean)
 
     const sliderValue = this.getSliderValue()
-  
+
     return (
       <div>
         <P {...styles.question}>{text}</P>
@@ -141,9 +143,9 @@ class QuestionTypeRange extends Component {
 
               {/* Submit button */}
               <Button primary block disabled={!Number.isFinite(value) && !this.getInitialValue()} onClick={this.submitValue}>
-                {Number.isFinite(this.getInitialValue()) && this.getSliderValue() === this.getInitialValue() && 'Unveränderte Position speichern'}
-                {Number.isFinite(this.getInitialValue()) && this.getSliderValue() !== this.getInitialValue() && 'Neue Position speichern'}
-                {!Number.isFinite(this.getInitialValue()) && 'Position speichern'}
+                {Number.isFinite(this.getInitialValue()) && sliderValue === this.getInitialValue() && t.pluralize('questionnaire/question/range/keep', { count: sliderValue })}
+                {Number.isFinite(this.getInitialValue()) && sliderValue !== this.getInitialValue() && t.pluralize('questionnaire/question/range/update', { count: sliderValue })}
+                {!Number.isFinite(this.getInitialValue()) && t.pluralize('questionnaire/question/range/submit', { count: sliderValue })}
               </Button>
             </>
           }
@@ -159,4 +161,4 @@ class QuestionTypeRange extends Component {
   }
 }
 
-export default QuestionTypeRange
+export default withTranslations(QuestionTypeRange)

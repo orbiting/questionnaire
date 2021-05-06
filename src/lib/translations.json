@@ -1,20 +1,86 @@
-{
-  "data": [
-    {
-      "key": "questionnaire/header",
-      "value": "{userAnswerCount} von {questionCount} Fragen beantwortet"
-    },
-    {
-      "key": "questionnaire/invalid",
-      "value": "Bitte beantworten Sie mindestens eine Frage."
-    },
-    {
-      "key": "questionnaire/submit",
-      "value": "Abschicken"
-    },
-    {
-      "key": "questionnaire/cancel",
-      "value": "Abbrechen"
-    }
-  ]
-}
+[
+  {
+    "key": "questionnaire/notFound",
+    "value": "Der Fragebogen konnte nicht gefunden werden."
+  },
+  {
+    "key": "questionnaire/noUnattributedAnswers",
+    "value": "Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen müssen Sie sich anmelden. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder anonymisieren."
+  },
+  {
+    "key": "questionnaire/header",
+    "value": "{userAnswerCount} von {questionCount} Fragen beantwortet"
+  },
+  {
+    "key": "questionnaire/invalid",
+    "value": "Bitte beantworten Sie mindestens eine Frage."
+  },
+  {
+    "key": "questionnaire/submit/1",
+    "value": "Ihre Antwort übermitteln"
+  },
+  {
+    "key": "questionnaire/submit/other",
+    "value": "Ihre Antworten übermitteln"
+  },
+  {
+    "key": "questionnaire/cancel",
+    "value": "Abbrechen"
+  },
+  {
+    "key": "questionnaire/preview",
+    "value": "Nur Antworten von anderen anzeigen"
+  },
+  {
+    "key": "questionnaire/anon/intent",
+    "value": "Ihre Antworten anonymisieren"
+  },
+  {
+    "key": "questionnaire/anon/info",
+    "value": "Wenn Sie möchten, können Sie Ihre Antworten anonymisieren. Diese bleiben zwar in unserer Datenbank erhalten, aber wir vergessen, dass sie von Ihnen stammen. Wir können Ihnen danach nicht mehr anzeigen, was Sie geantwortet haben, und Sie können keine Antworten mehr abgeben."
+  },
+  {
+    "key": "questionnaire/anon/submit",
+    "value": "Anonymisieren"
+  },
+  {
+    "key": "questionnaire/anon/submittedAlready",
+    "value": "Sie haben Ihre Antworten anonymisiert und können daher nicht noch einmal teilnehmen."
+  },
+  {
+    "key": "questionnaire/question/choice/votes/0",
+    "value": "keine Stimme"
+  },
+  {
+    "key": "questionnaire/question/choice/votes/1",
+    "value": "eine Stimme"
+  },
+  {
+    "key": "questionnaire/question/choice/votes/other",
+    "value": "{count} Stimmen"
+  },
+  {
+    "key": "questionnaire/question/choice/true",
+    "value": "Ja {value}%"
+  },
+  {
+    "key": "questionnaire/question/choice/false",
+    "value": "Nein {value}%"
+  },
+  {
+    "key": "questionnaire/question/range/keep/other",
+    "value": "Unveränderte Position speichern"
+  },
+  {
+    "key": "questionnaire/question/range/update/other",
+    "value": "Neue Position speichern"
+  },
+  {
+    "key": "questionnaire/question/range/submit/other",
+    "value": "Position speichern"
+  },
+  {
+    "key": "questionnaire/question/range/answer",
+    "value": "Ihre Position"
+  }
+]
