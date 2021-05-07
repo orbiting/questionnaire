@@ -2,14 +2,13 @@ import React, { Component } from 'react'
 import { css } from 'glamor'
 import get from 'lodash/get'
 
-import { Button, Interaction, Label, colors } from '@project-r/styleguide'
+import { Button, Interaction, Label, Slider, colors } from '@project-r/styleguide'
 
 const { P } = Interaction
 
 import uuid from '../lib/uuid'
 import { withTranslations } from '../lib/TranslationsContext'
 
-import Slider from './Base/Slider'
 import Chart from './QuestionTypeRangeChart'
 
 const styles = {
@@ -114,21 +113,14 @@ class QuestionTypeRange extends Component {
           {!submitted && !showResults &&
             <>
               {/* Slider with track */}
-              <div style={{position: 'relative', minHeight: 20}}>
-                {/* Track */}
-                <div style={{position: 'absolute', width: '100%', marginTop: 6}}>
-                  <div style={{height: 8, backgroundColor: this.colors.track}} />
-                </div>
-
-                {/* Slider */}
-                <div style={{position: 'absolute', width: '100%'}}>
-                  <Slider
-                    min={this.ticks.first.value}
-                    max={this.ticks.last.value}
-                    step={this.step}
-                    value={sliderValue}
-                    onChange={(_, value) => this.setState({ value })} />
-                </div>
+              <div style={{minHeight: 20}}>
+                <Slider
+                  min={this.ticks.first.value}
+                  max={this.ticks.last.value}
+                  step={this.step}
+                  fullWidth
+                  value={sliderValue}
+                  onChange={(_, value) => this.setState({ value })} />
               </div>
 
               {/* Slider Legend, Labels | min ---> max | */}
