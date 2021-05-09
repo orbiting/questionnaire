@@ -185,5 +185,5 @@ class QuestionTypeRange extends Component {
     )
   }
 }
-/**/
+
 export default withTranslations(QuestionTypeRange)
