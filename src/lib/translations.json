@@ -5,7 +5,7 @@
   },
   {
     "key": "questionnaire/noUnattributedAnswers",
-    "value": "Damit wir Ihnen zeigen können wo Sie im Vergleich zu allen anderen stehen müssen Sie sich anmelden. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit wieder anonymisieren."
+    "value": "Damit wir Ihnen zeigen können wo Sie im Vergleich anderen stehen müssen Sie sich anmelden. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit anonymisieren."
   },
   {
     "key": "questionnaire/header",
@@ -68,15 +68,15 @@
     "value": "Nein {value}%"
   },
   {
-    "key": "questionnaire/question/range/keep/other",
+    "key": "questionnaire/question/range/keep",
     "value": "Unveränderte Position speichern"
   },
   {
-    "key": "questionnaire/question/range/update/other",
+    "key": "questionnaire/question/range/update",
     "value": "Neue Position speichern"
   },
   {
-    "key": "questionnaire/question/range/submit/other",
+    "key": "questionnaire/question/range/submit",
     "value": "Position speichern"
   },
   {

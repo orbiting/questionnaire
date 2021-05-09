@@ -10,9 +10,7 @@ import {
   ColorContextLocalExtension,
 } from '@project-r/styleguide'
 import { Chart } from '@project-r/styleguide/chart'
-import {
-  useTranslationContext,
-} from '../lib/TranslationsContext'
+import { useTranslationContext } from '../lib/TranslationsContext'
 
 const styles = {
   chartLegend: css({
@@ -29,7 +27,7 @@ const styles = {
   chartLegendLabel: css({
     paddingRight: 10,
   }),
-  rangeLegend: css({
+  ticksLabels: css({
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: 10,
@@ -166,6 +164,41 @@ const Legend = ({ entries }) => {
   )
 }
 
+export const TicksLabels = ({ question }) => {
+  const [t] = useTranslationContext()
+
+  const ticks = useMemo(
+    () => ({
+      first: question.ticks[0],
+      last: question.ticks[question.ticks.length - 1],
+    }),
+    [question.ticks]
+  )
+
+  return (
+    <div {...styles.ticksLabels}>
+      <div>
+        <Label>
+          {t(
+            `questionnaire/question/${question.order}/range/tick/first`,
+            { value: ticks.first.value },
+            ticks.first.label
+          )}
+        </Label>
+      </div>
+      <div>
+        <Label>
+          {t(
+            `questionnaire/question/${question.order}/range/tick/last`,
+            { value: ticks.last.value },
+            ticks.last.label
+          )}
+        </Label>
+      </div>
+    </div>
+  )
+}
+
 /**
  * Chart will render a series of bars. Each bar is color-coded,
  * a color representing its value. Color is calculated using either:
@@ -186,7 +219,7 @@ const QuestionTypeRangeChart = (props) => {
     return null
   }
 
-  const { userAnswer, rangeResults } = question
+  const { order, userAnswer, rangeResults } = question
   const { histogram } = rangeResults
 
   const value = userAnswer && userAnswer.payload && userAnswer.payload.value
@@ -235,7 +268,11 @@ const QuestionTypeRangeChart = (props) => {
         colors.answerDark || colors.answer || fallback.colorsDark.answer
 
       legend.push({
-        label: t('questionnaire/question/range/answer'),
+        label: t(
+          `questionnaire/question/${order}/range/answer`,
+          { value },
+          t('questionnaire/question/range/answer')
+        ),
         color,
       })
 
@@ -283,15 +320,7 @@ const QuestionTypeRangeChart = (props) => {
         values={values}
       />
 
-      {/* Range Legend, labels | min ---> max | */}
-      <div {...styles.rangeLegend}>
-        <div>
-          <Label>{ticks.first.label}</Label>
-        </div>
-        <div>
-          <Label>{ticks.last.label}</Label>
-        </div>
-      </div>
+      <TicksLabels question={question} />
     </>
   )
 }

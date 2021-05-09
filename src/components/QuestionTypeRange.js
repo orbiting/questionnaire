@@ -2,14 +2,14 @@ import React, { Component } from 'react'
 import { css } from 'glamor'
 import get from 'lodash/get'
 
-import { Button, Interaction, Label, Slider } from '@project-r/styleguide'
+import { Button, Interaction, Slider } from '@project-r/styleguide'
 
 const { P } = Interaction
 
 import uuid from '../lib/uuid'
 import { withTranslations } from '../lib/TranslationsContext'
 
-import Chart from './QuestionTypeRangeChart'
+import Chart, { TicksLabels } from './QuestionTypeRangeChart'
 
 const styles = {
   question: css({
@@ -19,12 +19,6 @@ const styles = {
     marginTop: 30,
     marginBottom: 30,
     minHeight: 130,
-  }),
-  sliderLegend: css({
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: 10,
-    marginBottom: 20,
   }),
 }
 
@@ -95,7 +89,7 @@ class QuestionTypeRange extends Component {
       colorsDark,
     } = this.props
     const { value, submitted } = this.state
-    const { text } = question
+    const { order, text } = question
 
     // Create bins for chart w/ augments configs
     const augmentedBins =
@@ -122,31 +116,26 @@ class QuestionTypeRange extends Component {
 
     return (
       <div>
-        <P {...styles.question}>{text}</P>
+        <P {...styles.question}>
+          {t(
+            `questionnaire/question/${order}/text`,
+            { value: sliderValue },
+            text
+          )}
+        </P>
         <div {...styles.content}>
           {!submitted && !showResults && (
             <>
-              {/* Slider with track */}
-              <div style={{ minHeight: 20 }}>
-                <Slider
-                  min={this.ticks.first.value}
-                  max={this.ticks.last.value}
-                  step={this.step}
-                  fullWidth
-                  value={sliderValue}
-                  onChange={(_, value) => this.setState({ value })}
-                />
-              </div>
+              <Slider
+                min={this.ticks.first.value}
+                max={this.ticks.last.value}
+                step={this.step}
+                fullWidth
+                value={sliderValue}
+                onChange={(_, value) => this.setState({ value })}
+              />
 
-              {/* Slider Legend, Labels | min ---> max | */}
-              <div {...styles.sliderLegend}>
-                <div>
-                  <Label>{this.ticks.first.label}</Label>
-                </div>
-                <div>
-                  <Label>{this.ticks.last.label}</Label>
-                </div>
-              </div>
+              <TicksLabels question={question} />
 
               {/* Submit button */}
               <Button
@@ -157,18 +146,24 @@ class QuestionTypeRange extends Component {
               >
                 {Number.isFinite(this.getInitialValue()) &&
                   sliderValue === this.getInitialValue() &&
-                  t.pluralize('questionnaire/question/range/keep', {
-                    count: sliderValue,
-                  })}
+                  t(
+                    `questionnaire/question/${order}/range/keep`,
+                    { value: sliderValue },
+                    t('questionnaire/question/range/keep')
+                  )}
                 {Number.isFinite(this.getInitialValue()) &&
                   sliderValue !== this.getInitialValue() &&
-                  t.pluralize('questionnaire/question/range/update', {
-                    count: sliderValue,
-                  })}
+                  t(
+                    `questionnaire/question/${order}/range/update`,
+                    { value: sliderValue },
+                    t('questionnaire/question/range/update')
+                  )}
                 {!Number.isFinite(this.getInitialValue()) &&
-                  t.pluralize('questionnaire/question/range/submit', {
-                    count: sliderValue,
-                  })}
+                  t(
+                    `questionnaire/question/${order}/range/submit`,
+                    { value: sliderValue },
+                    t('questionnaire/question/range/submit')
+                  )}
               </Button>
             </>
           )}

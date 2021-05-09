@@ -26,21 +26,34 @@ Von Peter Parker, 12.06.2020
   "autoHtml": false,
   "props": {
     "slug": "mss-klimabeitrag",
-    "hideAnonymize": true,
     "translations": [
       {
-        "key": "questionnaire/question/range/submit/other",
-        "value": "{count} Franken speichern"
+        "key": "questionnaire/question/0/text",
+        "value": "Wie viel wären Sie bereit für einen solchen Dienst auszugeben?"
+      },
+      {
+        "key": "questionnaire/question/0/range/submit",
+        "value": "{value} Franken speichern"
+      },
+      {
+        "key": "questionnaire/question/0/range/tick/first",
+        "value": "nichts"
+      },
+      {
+        "key": "questionnaire/question/0/range/tick/last",
+        "value": "1000 Franken und mehr"
       }
     ],
     "settings": [
       {
         "order": 0,
         "colors": {
-          "clusters": ["#fbfbfb", "#f7f7f7", "#f3f3f3", "#efefef", "#eaeaea", "#e6e6e6", "#e2e2e2", "#dedede", "#dadada", "#d6d6d6"]
+          "min": "#fbfbfb",
+          "max": "#d6d6d6"
         },
         "colorsDark": {
-          "clusters": ["#232323", "#2b2b2b", "#343434", "#3d3d3d", "#454545", "#4f4f4f", "#585858", "#616161", "#6b6b6b", "#757575"]
+          "min": "#232323",
+          "max": "#757575"
         },
         "slider": {
           "step": 1
@@ -49,12 +62,13 @@ Von Peter Parker, 12.06.2020
           {
             "path": "[0].userAnswer.payload.value",
             "color": "#048e02",
-            "label": "Ihre Position"
+            "colorDark": "#00AA00",
+            "label": "{value} Franken (Sie)"
           },
           {
             "path": "[0].rangeResults.median",
             "color": "#ba5968",
-            "label": "Mittelwert"
+            "label": "{value} Franken (Mittelwert)"
           }
         ]
       }
