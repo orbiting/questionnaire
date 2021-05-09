@@ -40,9 +40,7 @@ const styles = {
     marginBottom: 60
   }),
   count: css({
-    background: '#fff',
     zIndex: 10,
-    borderTop: `0.5px solid ${colors.divider}`,
     minHeight: 25
   }),
   actions: css({
