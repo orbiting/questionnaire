@@ -1,180 +1,299 @@
-import React, { Component, Fragment, useContext } from 'react'
+import React, { Fragment, useMemo } from 'react'
 import scaleCluster from 'd3-scale-cluster'
 import { interpolate } from 'd3-interpolate'
-import { css, merge } from 'glamor'
+import { css } from 'glamor'
 
-import { Label, colors, mediaQueries } from '@project-r/styleguide'
+import {
+  Label,
+  mediaQueries,
+  useColorContext,
+  ColorContextLocalExtension,
+} from '@project-r/styleguide'
 import { Chart } from '@project-r/styleguide/chart'
-import { withTranslations } from '../lib/TranslationsContext'
+import {
+  useTranslationContext,
+} from '../lib/TranslationsContext'
 
 const styles = {
   chartLegend: css({
     display: 'flex',
-    marginBottom: 20
+    marginBottom: 20,
   }),
   chartLegendColorSample: css({
     width: 2,
     marginRight: 4,
     [mediaQueries.lUp]: {
-      width: 4
-    }
+      width: 4,
+    },
   }),
   chartLegendLabel: css({
-    paddingRight: 10
+    paddingRight: 10,
   }),
   rangeLegend: css({
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: 10,
-    marginBottom: 20
-  })
+    marginBottom: 20,
+  }),
+}
+
+const fallback = {
+  colors: {
+    min: '#fbfbfb',
+    max: '#d6d6d6',
+    answer: '#000000',
+  },
+  colorsDark: {
+    min: '#232323',
+    max: '#757575',
+    answer: '#ffffff',
+  },
 }
 
 const isValueWithinBin = (value, { x0, x1 }, isLast) =>
   Number.isFinite(value) &&
   value >= x0 &&
-  (
-    (!isLast && value < x1) ||
-    (isLast && value <= x1)
-  )
+  ((!isLast && value < x1) || (isLast && value <= x1))
 
-class QuestionTypeRangeChart extends Component {
-  constructor(props) {
-    super(props)
+const generateColorsClusters = (min, max) => {
+  const getColor = interpolate(min, max)
+  const clusters = []
 
-    const { question: { ticks } } = props
-
-    this.colors = {
-      // Default colors
-      empty: 'white',
-      min: colors.secondaryBg,
-      max: colors.divider,
-      answer: colors.primary,
-
-      // Overwrite colors
-      ...props.colors
-    }
-  
-    this.getRangeColor = interpolate(this.colors.min, this.colors.max)
-
-    this.ticks = {
-      first: ticks[0],
-      last: ticks[ticks.length - 1]
-    }
+  clusters.push(getColor(0))
+  for (let i = 1; i <= 10 - 1; i++) {
+    clusters.push(getColor((1 / 10) * i))
   }
 
-  render () {
-    const { question, augmentedBins, t } = this.props
+  return clusters
+}
 
-    if (!question || !question.rangeResults) {
-      return null
-    }
+const getBinCount = (bin) => bin.count
 
-    const { userAnswer, rangeResults } = question
-    const { histogram } = rangeResults
-
-    const value = userAnswer && userAnswer.payload && userAnswer.payload.value
-
-    const legend = (
-      augmentedBins &&
-      augmentedBins
-        .filter(ab => ab.label)
-        .map(ab => ({
-          label: ab.label,
-          color: ab.color,
-          value: Math.round(ab.value)
-        }))
-    ) || []
-
-    const values = histogram.map((_, index) => ({ time: index + 1, value: '1' }))
-
-    const max = histogram.reduce((prev, curr) => curr.count !== 0 && curr.count > prev.count ? curr : prev)
-    const min = histogram.reduce((prev, curr) => curr.count !== 0 && curr.count < prev.count ? curr : prev)
-
-    const getRangeColorCustered = this.colors.clusters &&
-      scaleCluster()
-        .domain(histogram.map(bin => bin.count))
-        .range(this.colors.clusters)
-
-    const colorRange = histogram.map((bin, index) => {
-      // Paint augmented bin
-      const augmentedBin =
-        augmentedBins &&
-        augmentedBins.find(augmentedBin => isValueWithinBin(augmentedBin.value, bin, index === histogram.length - 1))
-
-      if (augmentedBin) {
-        return augmentedBin.color
-      }
-
-      // Add state.value to legend and paint as answer
-      if (isValueWithinBin(value, bin, index === histogram.length - 1)) {
-        legend.push({
-          label: t('questionnaire/question/range/answer'),
-          color: this.colors.answer
-        })
-
-        return this.colors.answer
-      }
-
-      if (getRangeColorCustered) {
-        return getRangeColorCustered(bin.count)
-      }
-
-      // Paint bucket w/ count = 0 
-      if (bin.count === 0) {
-        return this.colors.empty
-      }
-
-      // Paint bin w/ range color
-      // transpose value between 0 and 1
-      const relativeValue = 1 / (max.count - min.count) * (bin.count - min.count)
-      return Number.isFinite(relativeValue) ? this.getRangeColor(relativeValue) : this.getRangeColor(1)
-
-    })
-
-    return (
-      <>
-        {/* Legend */}
-        <div {...styles.chartLegend}>
-          {legend.map(({ label, color, value }, index) => (
-            <Fragment key={`label-${index}`}>
-              <div {...merge(styles.chartLegendColorSample, { backgroundColor: color })} />
-              <div {...styles.chartLegendLabel}>
-                <Label style={{ color }}>{t(label, { value }, label)}</Label>
-              </div>
-            </Fragment>
-          ))}
-        </div>
-
-        <Chart
-          config={{
-            type: 'Bar',
-            color: 'time',
-            barStyle: 'large',
-            highlight: 'true',
-            xTicks: [],
-            domain: [0, values.length],
-            colorSort: 'none',
-            sort: 'none',
-            columnSort: 'none',
-            colorRange,
-            height: 1000
-          }}
-          values={values}
-        />
-
-        {/* Range Legend, labels | min ---> max | */}
-        <div {...styles.rangeLegend}>
-          <div>
-            <Label>{this.ticks.first.label}</Label>
-          </div>
-          <div>
-            <Label>{this.ticks.last.label}</Label>
-          </div>
-        </div>
-      </>
+const createColorGetter = (histogram, colors, colorsDark) => {
+  const colorsClusters =
+    colors.clusters ||
+    generateColorsClusters(
+      colors.min || fallback.colors.min,
+      colors.max || fallback.colors.max
     )
+
+  const colorsDarkClusters =
+    colorsDark.clusters ||
+    colors.clusters ||
+    generateColorsClusters(
+      colorsDark.min || fallback.colorsDark.min,
+      colorsDark.max || fallback.colorsDark.max
+    )
+
+  const getColor = scaleCluster()
+    .domain(histogram.map(getBinCount))
+    .range(colorsClusters)
+
+  const getColorDark = scaleCluster()
+    .domain(histogram.map(getBinCount))
+    .range(colorsDarkClusters)
+
+  return (count) => {
+    return {
+      color: getColor(count),
+      colorDark: getColorDark(count),
+    }
   }
 }
 
-export default withTranslations(QuestionTypeRangeChart)
+const spreadIndexToTime = (_, index) => ({ time: index + 1, value: '1' })
+
+const LocalColorContext = (props) => {
+  const { colorDarkMapping, children } = props
+
+  const colorContextExtension = useMemo(() => {
+    if (!colorDarkMapping) {
+      return null
+    }
+    const keys = Object.keys(colorDarkMapping)
+    return {
+      localColors: keys.reduce(
+        (localColors, key, i) => {
+          localColors.dark[`charts${i}`] = colorDarkMapping[key]
+          localColors.light[`charts${i}`] = key
+          return localColors
+        },
+        { dark: {}, light: {} }
+      ),
+      localMappings: keys.reduce(
+        (mappings, key, i) => {
+          mappings.charts[key] = `charts${i}`
+          return mappings
+        },
+        { charts: {} }
+      ),
+    }
+  }, [colorDarkMapping])
+
+  if (!colorContextExtension) {
+    return children
+  }
+
+  return (
+    <ColorContextLocalExtension {...colorContextExtension}>
+      {children}
+    </ColorContextLocalExtension>
+  )
+}
+
+const Legend = ({ entries }) => {
+  const [colorScheme] = useColorContext()
+  const [t] = useTranslationContext()
+
+  return (
+    <div {...styles.chartLegend}>
+      {entries.map(({ label, color, value }, index) => (
+        <Fragment key={`label-${index}`}>
+          <div
+            {...styles.chartLegendColorSample}
+            {...colorScheme.set('backgroundColor', color, 'charts')}
+          />
+          <div {...styles.chartLegendLabel}>
+            <Label>
+              <span {...colorScheme.set('color', color, 'charts')}>
+                {t(label, { value }, label)}
+              </span>
+            </Label>
+          </div>
+        </Fragment>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Chart will render a series of bars. Each bar is color-coded,
+ * a color representing its value. Color is calculated using either:
+ *  - a range {colors.min}, {colors.max}
+ *  - a series {colors.cluster}
+ *
+ * If setting is available {colorsDark.*}, we will calculate a dark
+ * color representation for each color-coded bar and pass along
+ * to bar <Chart />.
+ *
+ */
+const QuestionTypeRangeChart = (props) => {
+  const [t] = useTranslationContext()
+
+  const { question, augmentedBins, colors = {}, colorsDark = {} } = props
+
+  if (!question || !question.rangeResults) {
+    return null
+  }
+
+  const { userAnswer, rangeResults } = question
+  const { histogram } = rangeResults
+
+  const value = userAnswer && userAnswer.payload && userAnswer.payload.value
+
+  const legend =
+    (augmentedBins &&
+      augmentedBins
+        .filter((ab) => ab.label)
+        .map(({ label, color, value }) => ({
+          label,
+          color,
+          value: Math.round(value),
+        }))) ||
+    []
+
+  const getColor = createColorGetter(histogram, colors, colorsDark)
+
+  const colorDarkMapping = {}
+  const colorRange = histogram.map((bin, index) => {
+    // Paint augmented bin
+    const augmentedBin =
+      augmentedBins &&
+      augmentedBins.find((augmentedBin) =>
+        isValueWithinBin(
+          augmentedBin.value,
+          bin,
+          index === histogram.length - 1
+        )
+      )
+
+    if (augmentedBin) {
+      const { color, colorDark } = augmentedBin
+
+      if (colorDark) {
+        colorDarkMapping[color] = colorDark
+      }
+
+      return color
+    }
+
+    // Add state.value to legend and paint as answer
+    // render if augmented bins will not return value
+    if (isValueWithinBin(value, bin, index === histogram.length - 1)) {
+      const color = colors.answer || fallback.colors.answer
+      const colorDark =
+        colors.answerDark || colors.answer || fallback.colorsDark.answer
+
+      legend.push({
+        label: t('questionnaire/question/range/answer'),
+        color,
+      })
+
+      colorDarkMapping[color] = colorDark
+
+      return color
+    }
+
+    const { color, colorDark } = getColor(bin.count)
+    if (colorDark) {
+      colorDarkMapping[color] = colorDark
+    }
+
+    return color
+  })
+
+  const values = histogram.map(spreadIndexToTime)
+
+  const ticks = {
+    first: question.ticks[0],
+    last: question.ticks[question.ticks.length - 1],
+  }
+
+  return (
+    <>
+      <LocalColorContext colorDarkMapping={colorDarkMapping}>
+        <Legend entries={legend} />
+      </LocalColorContext>
+
+      <Chart
+        config={{
+          type: 'Bar',
+          color: 'time',
+          barStyle: 'large',
+          highlight: 'true',
+          xTicks: [],
+          domain: [0, values.length],
+          colorSort: 'none',
+          sort: 'none',
+          columnSort: 'none',
+          colorRange,
+          colorDarkMapping,
+          height: 1000,
+        }}
+        values={values}
+      />
+
+      {/* Range Legend, labels | min ---> max | */}
+      <div {...styles.rangeLegend}>
+        <div>
+          <Label>{ticks.first.label}</Label>
+        </div>
+        <div>
+          <Label>{ticks.last.label}</Label>
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default QuestionTypeRangeChart
