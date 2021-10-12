@@ -58,7 +58,7 @@ const styles = {
   }),
 }
 
-const Chart = (props) => {
+const QuestionTypeChoiceChart = (props) => {
   const [colorScheme] = useColorContext()
   const { question, t } = props
   if (!question || !question.choiceResults) {
@@ -166,4 +166,4 @@ const Chart = (props) => {
   )
 }
 
-export default withTranslations(Chart)
+export default withTranslations(QuestionTypeChoiceChart)
