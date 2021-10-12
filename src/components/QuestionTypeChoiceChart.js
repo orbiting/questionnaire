@@ -115,8 +115,8 @@ const QuestionTypeChoiceChart = (props) => {
               {userAnswerTrue && (
                 <CheckCircle
                   {...styles.userAnswerIcon}
+                  {...colorScheme.set('color', 'primary')}
                   size={CIRCLE_SIZE}
-                  color={colors.primary}
                 />
               )}
             </span>
@@ -145,8 +145,8 @@ const QuestionTypeChoiceChart = (props) => {
               {userAnswerFalse && (
                 <CheckCircle
                   {...styles.userAnswerIcon}
+                  {...colorScheme.set('color', 'primary')}
                   size={CIRCLE_SIZE}
-                  color={colors.primary}
                 />
               )}
             </span>
