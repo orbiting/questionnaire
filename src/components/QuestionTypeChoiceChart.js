@@ -58,7 +58,7 @@ const styles = {
   }),
 }
 
-const Chart = (props) => {
+const QuestionTypeChoiceChart = (props) => {
   const [colorScheme] = useColorContext()
   const { question, t } = props
   if (!question || !question.choiceResults) {
@@ -122,8 +122,8 @@ const Chart = (props) => {
               {userAnswerTrue && (
                 <CheckCircle
                   {...styles.userAnswerIcon}
+                  {...colorScheme.set('color', 'primary')}
                   size={CIRCLE_SIZE}
-                  color={colors.primary}
                 />
               )}
             </span>
@@ -162,8 +162,8 @@ const Chart = (props) => {
               {userAnswerFalse && (
                 <CheckCircle
                   {...styles.userAnswerIcon}
+                  {...colorScheme.set('color', 'primary')}
                   size={CIRCLE_SIZE}
-                  color={colors.primary}
                 />
               )}
             </span>
@@ -183,4 +183,4 @@ const Chart = (props) => {
   )
 }
 
-export default withTranslations(Chart)
+export default withTranslations(QuestionTypeChoiceChart)
