@@ -99,6 +99,7 @@ const QuestionTypeChoiceChart = (props) => {
           <div
             {...styles.bar}
             {...colorScheme.set('backgroundColor', 'sequential60')}
+            {...colorScheme.set('color', 'default')}
             style={{
               right: 0,
               width: `${truePercent}%`,
@@ -130,6 +131,7 @@ const QuestionTypeChoiceChart = (props) => {
           <div
             {...styles.bar}
             {...colorScheme.set('backgroundColor', 'opposite60')}
+            {...colorScheme.set('color', 'default')}
             style={{
               left: 0,
               width: `${falsePercent}%`,
