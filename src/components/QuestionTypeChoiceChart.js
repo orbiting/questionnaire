@@ -110,7 +110,7 @@ const QuestionTypeChoiceChart = (props) => {
             <span
               style={{
                 marginLeft: userAnswerTrue ? -CIRCLE_SIZE : 0,
-                right: truePercent < 25 ? '90%' : 0,
+                right: truePercent < 25 ? '100%' : 0,
                 position: truePercent < 25 && 'relative',
               }}
             >
