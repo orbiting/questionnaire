@@ -99,6 +99,7 @@ const Chart = (props) => {
           <div
             {...styles.bar}
             {...colorScheme.set('backgroundColor', 'sequential60')}
+            {...colorScheme.set('color', truePercent < 25 ? 'text' : 'default')}
             style={{
               right: 0,
               width: `${truePercent}%`,
@@ -106,7 +107,13 @@ const Chart = (props) => {
               textAlign: 'left',
             }}
           >
-            <span style={{ marginLeft: userAnswerTrue ? -CIRCLE_SIZE : 0 }}>
+            <span
+              style={{
+                marginLeft: userAnswerTrue ? -CIRCLE_SIZE : 0,
+                right: truePercent < 25 ? '90%' : 0,
+                position: truePercent < 25 && 'relative',
+              }}
+            >
               <label {...styles.barLabel}>
                 {t('questionnaire/question/choice/true', {
                   value: truePercent,
@@ -130,13 +137,23 @@ const Chart = (props) => {
           <div
             {...styles.bar}
             {...colorScheme.set('backgroundColor', 'opposite60')}
+            {...colorScheme.set(
+              'color',
+              falsePercent < 25 ? 'text' : 'default'
+            )}
             style={{
               left: 0,
               width: `${falsePercent}%`,
               textAlign: 'right',
             }}
           >
-            <span style={{ marginRight: userAnswerFalse ? -CIRCLE_SIZE : 0 }}>
+            <span
+              style={{
+                marginRight: userAnswerFalse ? -CIRCLE_SIZE : 0,
+                left: falsePercent < 25 ? '100%' : 0,
+                position: falsePercent < 25 && 'relative',
+              }}
+            >
               <label {...styles.barLabel}>
                 {t('questionnaire/question/choice/false', {
                   value: falsePercent,
