@@ -102,7 +102,7 @@ const styles = {
 }
 
 const labelGauger = createTextGauger(
-  { fontFamily: fontFamilies.sansSerifMedium, fontSize: '16px' },
+  { fontFamily: fontFamilies.sansSerifRegular, fontSize: '16px' },
   {
     dimension: 'width',
     html: true,
@@ -134,11 +134,11 @@ const QuestionTypeChoiceChart = (props) => {
 
   const truePercentWidth = ((window.innerWidth - 50) * truePercent) / 100 / 2
   const moveTruePercentLabel =
-    labelGauger('Ja ' + truePercent + '%') + 4 > truePercentWidth
+    labelGauger('Ja ' + truePercent + '%') + 8 > truePercentWidth
 
   const falsePercentWidth = ((window.innerWidth - 50) * falsePercent) / 100 / 2
   const moveFalsePercentLabel =
-    labelGauger('Nein ' + falsePercent + '%') + 4 > falsePercentWidth
+    labelGauger('Nein ' + falsePercent + '%') + 8 > falsePercentWidth
 
   return (
     <div style={{ width: '100%' }}>
