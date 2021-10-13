@@ -137,11 +137,11 @@ const QuestionTypeChoiceChart = (props) => {
 
   const truePercentWidth = ((windowWidth - 50) * truePercent) / 100 / 2
   const moveTruePercentLabel =
-    labelGauger('Ja ' + truePercent + '%') + 8 > truePercentWidth
+    labelGauger('Ja ' + truePercent + '%') + 2 > truePercentWidth
 
   const falsePercentWidth = ((windowWidth - 50) * falsePercent) / 100 / 2
   const moveFalsePercentLabel =
-    labelGauger('Nein ' + falsePercent + '%') + 8 > falsePercentWidth
+    labelGauger('Nein ' + falsePercent + '%') + 2 > falsePercentWidth
 
   return (
     <div style={{ width: '100%' }}>
