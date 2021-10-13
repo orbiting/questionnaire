@@ -57,6 +57,7 @@ const styles = {
     display: 'flex',
     width: '100%',
     height: HEIGHT,
+    position: 'relative',
   }),
   barTick: css({
     position: 'relative',
@@ -132,11 +133,13 @@ const QuestionTypeChoiceChart = (props) => {
   const truePercent = getPercentage(trueResult)
   const falsePercent = getPercentage(falseResult)
 
-  const truePercentWidth = ((window.innerWidth - 50) * truePercent) / 100 / 2
+  const windowWidth = Math.min(window.innerWidth, 725)
+
+  const truePercentWidth = ((windowWidth - 50) * truePercent) / 100 / 2
   const moveTruePercentLabel =
     labelGauger('Ja ' + truePercent + '%') + 8 > truePercentWidth
 
-  const falsePercentWidth = ((window.innerWidth - 50) * falsePercent) / 100 / 2
+  const falsePercentWidth = ((windowWidth - 50) * falsePercent) / 100 / 2
   const moveFalsePercentLabel =
     labelGauger('Nein ' + falsePercent + '%') + 8 > falsePercentWidth
 
@@ -151,9 +154,26 @@ const QuestionTypeChoiceChart = (props) => {
       </div>
       <div {...styles.bars}>
         <div
-          {...styles.barTick}
-          {...colorScheme.set('backgroundColor', 'divider')}
-        ></div>
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '100%',
+            position: 'absolute',
+          }}
+        >
+          <div
+            {...styles.barTick}
+            {...colorScheme.set('backgroundColor', 'divider')}
+          ></div>
+          <div
+            {...styles.barTick}
+            {...colorScheme.set('backgroundColor', 'divider')}
+          ></div>{' '}
+          <div
+            {...styles.barTick}
+            {...colorScheme.set('backgroundColor', 'divider')}
+          ></div>
+        </div>
         <div {...styles.left}>
           <div
             id='true-percent-wrapper'
@@ -192,10 +212,6 @@ const QuestionTypeChoiceChart = (props) => {
             </span>
           </div>
         </div>
-        <div
-          {...styles.barTick}
-          {...colorScheme.set('backgroundColor', 'divider')}
-        ></div>
         <div {...styles.right}>
           <div
             {...styles.bar}
@@ -232,10 +248,6 @@ const QuestionTypeChoiceChart = (props) => {
             </span>
           </div>
         </div>
-        <div
-          {...styles.barTick}
-          {...colorScheme.set('backgroundColor', 'divider')}
-        ></div>
       </div>
       <div {...styles.labels}>
         <label {...styles.label}>100%</label>
