@@ -1,9 +1,52 @@
 import React, { Component } from 'react'
+import memoize from 'lodash/memoize'
 import { fontFamilies, colors, useColorContext } from '@project-r/styleguide'
 import { css } from 'glamor'
 import CheckCircle from 'react-icons/lib/md/check-circle'
 
 import { withTranslations } from '../lib/TranslationsContext'
+
+const measurementDiv = memoize(
+  () => {
+    const div = document.createElement('div')
+    div.className = 'DOMMEASUREMENTOUTLET'
+    div.style.position = 'fixed'
+    div.style.top = '-100%'
+    div.style.visibility = 'hidden'
+    div.style.pointerEvents = 'none'
+    document.body.appendChild(div)
+    return div
+  },
+  () => ''
+)
+
+const createTextGauger = memoize(
+  ({ fontFamily, fontSize, lineHeight }, { dimension, html }) => {
+    if (typeof document === 'undefined') {
+      return (text) => {
+        // SSR approximation
+        return fontSize * 0.6 * text.length
+      }
+    }
+    const element = document.createElement('span')
+    element.style.fontFamily = fontFamily
+    element.style.fontSize = `${fontSize}px`
+    element.style.lineHeight = lineHeight
+    measurementDiv().appendChild(element)
+    if (html) {
+      return memoize((text) => {
+        element.innerHTML = text
+        return element.getBoundingClientRect()[dimension]
+      })
+    }
+    return memoize((text) => {
+      element.textContent = text
+      return element.getBoundingClientRect()[dimension]
+    })
+  },
+  ({ fontFamily, fontSize, lineHeight }, { dimension, html }) =>
+    [fontFamily, fontSize, lineHeight, dimension, html].join()
+)
 
 const HEIGHT = 64
 const BAR_HEIGHT = 32
@@ -58,6 +101,14 @@ const styles = {
   }),
 }
 
+const labelGauger = createTextGauger(
+  { fontFamily: fontFamilies.sansSerifMedium, fontSize: '16px' },
+  {
+    dimension: 'width',
+    html: true,
+  }
+)
+
 const QuestionTypeChoiceChart = (props) => {
   const [colorScheme] = useColorContext()
   const { question, t } = props
@@ -81,6 +132,14 @@ const QuestionTypeChoiceChart = (props) => {
   const truePercent = getPercentage(trueResult)
   const falsePercent = getPercentage(falseResult)
 
+  const truePercentWidth = ((window.innerWidth - 50) * truePercent) / 100 / 2
+  const moveTruePercentLabel =
+    labelGauger('Ja ' + truePercent + '%') + 4 > truePercentWidth
+
+  const falsePercentWidth = ((window.innerWidth - 50) * falsePercent) / 100 / 2
+  const moveFalsePercentLabel =
+    labelGauger('Nein ' + falsePercent + '%') + 4 > falsePercentWidth
+
   return (
     <div style={{ width: '100%' }}>
       <div {...styles.labels} style={{ justifyContent: 'space-around' }}>
@@ -97,9 +156,13 @@ const QuestionTypeChoiceChart = (props) => {
         ></div>
         <div {...styles.left}>
           <div
+            id='true-percent-wrapper'
             {...styles.bar}
             {...colorScheme.set('backgroundColor', 'sequential60')}
-            {...colorScheme.set('color', truePercent < 25 ? 'text' : 'default')}
+            {...colorScheme.set(
+              'color',
+              moveTruePercentLabel ? 'text' : 'default'
+            )}
             style={{
               right: 0,
               width: `${truePercent}%`,
@@ -110,8 +173,8 @@ const QuestionTypeChoiceChart = (props) => {
             <span
               style={{
                 marginLeft: userAnswerTrue ? -CIRCLE_SIZE : 0,
-                right: truePercent < 25 ? '100%' : 0,
-                position: truePercent < 25 && 'relative',
+                right: moveTruePercentLabel ? '100%' : 0,
+                position: moveTruePercentLabel && 'relative',
               }}
             >
               <label {...styles.barLabel}>
@@ -139,7 +202,7 @@ const QuestionTypeChoiceChart = (props) => {
             {...colorScheme.set('backgroundColor', 'opposite60')}
             {...colorScheme.set(
               'color',
-              falsePercent < 25 ? 'text' : 'default'
+              moveFalsePercentLabel ? 'text' : 'default'
             )}
             style={{
               left: 0,
@@ -150,8 +213,8 @@ const QuestionTypeChoiceChart = (props) => {
             <span
               style={{
                 marginRight: userAnswerFalse ? -CIRCLE_SIZE : 0,
-                left: falsePercent < 25 ? '100%' : 0,
-                position: falsePercent < 25 && 'relative',
+                left: moveFalsePercentLabel ? '100%' : 0,
+                position: moveFalsePercentLabel && 'relative',
               }}
             >
               <label {...styles.barLabel}>
