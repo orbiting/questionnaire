@@ -4,8 +4,20 @@
     "value": "Der Fragebogen konnte nicht gefunden werden."
   },
   {
+    "key": "questionnaire/ended",
+    "value": "Der Fragebogen ist geschlossen, es können keine Antworten mehr abgegeben werden."
+  },
+  {
+    "key": "questionnaire/notSignedIn",
+    "value": "Sie müssen angemeldet sein, um den Fragebogen sehen zu können."
+  },
+  {
+    "key": "questionnaire/notEligible",
+    "value": "Sie benötigen ein aktives Abonnement für die Beantwortung des Fragebogens."
+  },
+  {
     "key": "questionnaire/noUnattributedAnswers",
-    "value": "Damit wir Ihnen zeigen können wo Sie im Vergleich anderen stehen müssen Sie sich anmelden. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit anonymisieren."
+    "value": "Damit wir Ihnen zeigen können, wo Sie im Vergleich zu anderen Antworten stehen, müssen Sie sich anmelden. Sie benötigen keine Mitgliedschaft. Um Ihre Privatsphäre müssen Sie sich keine Sorgen machen: Sie können Ihre Antworten jederzeit anonymisieren."
   },
   {
     "key": "questionnaire/header",
@@ -14,6 +26,10 @@
   {
     "key": "questionnaire/invalid",
     "value": "Bitte beantworten Sie mindestens eine Frage."
+  },
+  {
+    "key": "questionnaire/hideAnswers/thankyou",
+    "value": "Herzlichen Dank für Ihre Antwort."
   },
   {
     "key": "questionnaire/submit/1",

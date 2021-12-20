@@ -25,6 +25,7 @@ import { withTranslations } from '../lib/TranslationsContext'
 
 import QuestionTypeChoice from './QuestionTypeChoice'
 import QuestionTypeRange from './QuestionTypeRange'
+import MessageBox from './MessageBox'
 
 const questionTypes = {
   QuestionTypeChoice,
@@ -96,6 +97,7 @@ const Questionnaire = (props) => {
     me,
     t,
     hideAnonymize,
+    hideAnswers,
     settings,
     submitAnswer,
     submitAnswerUnattributed,
@@ -224,13 +226,25 @@ const Questionnaire = (props) => {
           return <P {...styles.error}>{t('questionnaire/notFound')}</P>
         }
 
-        const { unattributedAnswers, questions, userHasSubmitted } =
-          questionnaire
+        const {
+          unattributedAnswers,
+          questions,
+          userIsEligible,
+          userHasSubmitted,
+          endDate,
+        } = questionnaire
 
+        if (new Date(endDate) < now) {
+          return <MessageBox>{t('questionnaire/ended')}</MessageBox>
+        }
         if ((!me || !me.id) && !unattributedAnswers) {
           return (
-            <P {...styles.signIn}>{t('questionnaire/noUnattributedAnswers')}</P>
+            <MessageBox>{t('questionnaire/noUnattributedAnswers')}</MessageBox>
           )
+        } else if (!me || !me.id) {
+          return <MessageBox>{t('questionnaire/notSignedIn')}</MessageBox>
+        } else if (!userIsEligible) {
+          return <MessageBox>{t('questionnaire/notEligible')}</MessageBox>
         }
 
         // handle questions
@@ -255,6 +269,7 @@ const Questionnaire = (props) => {
               React.createElement(questionTypes[question.__typename], {
                 unattributed: !me,
                 showResults: answersSubmitted || showResults,
+                hideAnswers,
                 ...(settings &&
                   settings.find((s) => s.order === question.order)),
                 onChange: createHandleChange(questionnaire, question),
@@ -279,7 +294,7 @@ const Questionnaire = (props) => {
                 </P>
               )}
               <div {...styles.actions}>
-                {!showResults && !answersSubmitted && (
+                {!hideAnswers && !showResults && !answersSubmitted && (
                   <div {...styles.action}>
                     <A
                       href='#'
@@ -433,6 +448,7 @@ const query = gql`
       id
       slug
       beginDate
+      endDate
       userIsEligible
       userHasSubmitted
       unattributedAnswers
