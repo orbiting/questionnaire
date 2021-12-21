@@ -2,7 +2,11 @@ import React from 'react'
 
 import { css } from 'glamor'
 
-import { useColorContext, fontStyles } from '@project-r/styleguide'
+import {
+  useColorContext,
+  fontStyles,
+  mediaQueries,
+} from '@project-r/styleguide'
 
 const styles = {
   box: css({
@@ -11,7 +15,10 @@ const styles = {
     textAlign: 'center',
   }),
   text: css({
-    ...fontStyles.sansSerifRegular21,
+    ...fontStyles.sansSerifRegular17,
+    [mediaQueries.mUp]: {
+      ...fontStyles.sansSerifRegular21,
+    },
   }),
 }
 

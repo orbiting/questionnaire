@@ -88,7 +88,9 @@ class QuestionTypeChoice extends Component {
             </div>
           )}
           {hideAnswers && (userAnswer || userHasSubmitted || showResults) && (
-            <MessageBox>{t('questionnaire/hideAnswers/thankyou')}</MessageBox>
+            <div {...styles.mobileBorder}>
+              <MessageBox>{t('questionnaire/hideAnswers/thankyou')}</MessageBox>
+            </div>
           )}
           {!userAnswer && !userHasSubmitted && !showResults && (
             <div {...styles.buttons}>

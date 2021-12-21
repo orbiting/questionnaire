@@ -235,16 +235,32 @@ const Questionnaire = (props) => {
         } = questionnaire
 
         if (new Date(endDate) < now) {
-          return <MessageBox>{t('questionnaire/ended')}</MessageBox>
+          return (
+            <div {...styles.container}>
+              <MessageBox>{t('questionnaire/ended')}</MessageBox>
+            </div>
+          )
         }
         if ((!me || !me.id) && !unattributedAnswers) {
           return (
-            <MessageBox>{t('questionnaire/noUnattributedAnswers')}</MessageBox>
+            <div {...styles.container}>
+              <MessageBox>
+                {t('questionnaire/noUnattributedAnswers')}
+              </MessageBox>
+            </div>
           )
         } else if (!me || !me.id) {
-          return <MessageBox>{t('questionnaire/notSignedIn')}</MessageBox>
+          return (
+            <div {...styles.container}>
+              <MessageBox>{t('questionnaire/notSignedIn')}</MessageBox>
+            </div>
+          )
         } else if (!userIsEligible) {
-          return <MessageBox>{t('questionnaire/notEligible')}</MessageBox>
+          return (
+            <div {...styles.container}>
+              <MessageBox>{t('questionnaire/notEligible')}</MessageBox>
+            </div>
+          )
         }
 
         // handle questions
