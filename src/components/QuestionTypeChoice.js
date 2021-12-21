@@ -28,6 +28,11 @@ const styles = {
       margin: '0px 10px',
     },
   }),
+  mobileBox: css({
+    [mediaQueries.onlyS]: {
+      margin: '20px 0',
+    },
+  }),
   buttons: css({
     width: '100%',
     display: 'flex',
@@ -88,7 +93,7 @@ class QuestionTypeChoice extends Component {
             </div>
           )}
           {hideAnswers && (userAnswer || userHasSubmitted || showResults) && (
-            <div {...styles.mobileBorder}>
+            <div {...styles.mobileBox}>
               <MessageBox>{t('questionnaire/hideAnswers/thankyou')}</MessageBox>
             </div>
           )}
