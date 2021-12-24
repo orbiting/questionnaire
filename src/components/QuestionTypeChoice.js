@@ -86,15 +86,17 @@ class QuestionTypeChoice extends Component {
     return (
       <div {...styles.container}>
         <P {...styles.question}>{text}</P>
+        {hideAnswers && (userAnswer || userHasSubmitted || showResults) && (
+          <div {...styles.message}>
+            <div {...styles.mobileBox}>
+              <MessageBox>{t('questionnaire/hideAnswers/thankyou')}</MessageBox>
+            </div>
+          </div>
+        )}
         <div {...styles.content}>
           {!hideAnswers && (userAnswer || userHasSubmitted || showResults) && (
             <div {...styles.mobileBorder}>
               <Chart question={question} />
-            </div>
-          )}
-          {hideAnswers && (userAnswer || userHasSubmitted || showResults) && (
-            <div {...styles.mobileBox}>
-              <MessageBox>{t('questionnaire/hideAnswers/thankyou')}</MessageBox>
             </div>
           )}
           {!userAnswer && !userHasSubmitted && !showResults && (

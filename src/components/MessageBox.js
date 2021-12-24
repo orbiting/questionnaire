@@ -10,6 +10,7 @@ import {
 
 const styles = {
   box: css({
+    display: 'block',
     margin: '10px 0',
     padding: 20,
     textAlign: 'center',
@@ -22,7 +23,6 @@ const styles = {
   }),
 }
 
-// deconstruct props directly
 const MessageBox = ({ children }) => {
   const [colorScheme] = useColorContext()
   return (
