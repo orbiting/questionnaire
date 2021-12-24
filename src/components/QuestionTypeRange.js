@@ -10,6 +10,7 @@ import uuid from '../lib/uuid'
 import { withTranslations } from '../lib/TranslationsContext'
 
 import Chart, { TicksLabels } from './QuestionTypeRangeChart'
+import MessageBox from './MessageBox'
 
 const styles = {
   question: css({
@@ -83,6 +84,7 @@ class QuestionTypeRange extends Component {
       questionnaire,
       question,
       showResults,
+      hideAnswers,
       augments,
       t,
       colors,
@@ -167,13 +169,16 @@ class QuestionTypeRange extends Component {
               </Button>
             </>
           )}
-          {(submitted || showResults) && (
+          {!hideAnswers && (submitted || showResults) && (
             <Chart
               question={question}
               augmentedBins={augmentedBins}
               colors={colors}
               colorsDark={colorsDark}
             />
+          )}
+          {hideAnswers && (submitted || showResults) && (
+            <MessageBox>{t('questionnaire/hideAnswers/thankyou')}</MessageBox>
           )}
         </div>
       </div>

@@ -1,5 +1,5 @@
 ---
-title: "Fragenbogen-Komponente in verschiedenen Ausführungen"
+title: 'Fragenbogen-Komponente in verschiedenen Ausführungen'
 feed: true
 ---
 
@@ -7,7 +7,7 @@ feed: true
 
 # Fragen fragen
 
-## 
+##
 
 Eine Fragebogen-Komponente kann mit Daten aus der query «questionnaire» umgehen und stellt die eigene Antwort im Vergleich zu anderen dar. Sie kann Fragen vom Typ «choice» und «range» darstellen, Antworten an Server schicken und einmal verschickte Daten anonymisieren.
 
@@ -26,6 +26,70 @@ Von Peter Parker, 12.06.2020
   "autoHtml": false,
   "props": {
     "slug": "mss-klimabeitrag",
+    "translations": [
+      {
+        "key": "questionnaire/question/0/text",
+        "value": "Wie viel wären Sie bereit für einen solchen Dienst auszugeben?"
+      },
+      {
+        "key": "questionnaire/question/0/range/submit",
+        "value": "{value} Franken speichern"
+      },
+      {
+        "key": "questionnaire/question/0/range/tick/first",
+        "value": "nichts"
+      },
+      {
+        "key": "questionnaire/question/0/range/tick/last",
+        "value": "1000 Franken und mehr"
+      }
+    ],
+    "settings": [
+      {
+        "order": 0,
+        "colors": {
+          "min": "#fbfbfb",
+          "max": "#d6d6d6"
+        },
+        "colorsDark": {
+          "min": "#232323",
+          "max": "#757575"
+        },
+        "slider": {
+          "step": 1
+        },
+        "augments": [
+          {
+            "path": "[0].userAnswer.payload.value",
+            "color": "#048e02",
+            "colorDark": "#00AA00",
+            "label": "{value} Franken (Sie)"
+          },
+          {
+            "path": "[0].rangeResults.median",
+            "color": "#ba5968",
+            "label": "{value} Franken (Mittelwert)"
+          }
+        ]
+      }
+    ]
+  },
+  "src": "https://cdn.republik.space/s3/republik-assets/dynamic-components/questionnaire/index.js"
+}
+```
+
+<hr /></section>
+
+## Komponente ohne andere Antworten
+
+<section><h6>DYNAMIC_COMPONENT</h6>
+
+```
+{
+  "autoHtml": false,
+  "props": {
+    "slug": "mss-klimabeitrag",
+    "hideAnswers": true,
     "translations": [
       {
         "key": "questionnaire/question/0/text",
@@ -252,7 +316,34 @@ Komponenten rendert alle Fragen:
 
 <hr /></section>
 
-Andere Komponente:
+## Fragebogen mit choice-Fragen ohne andere Antworten
+
+<section><h6>DYNAMIC_COMPONENT</h6>
+
+```
+{
+  "autoHtml": false,
+  "props": {
+    "slug": "mss-demokratie",
+    "hideAnswers": true,
+    "colors": [
+      {
+        "value": true,
+        "color": "#6FB977"
+      },
+      {
+        "value": false,
+        "color": "#AD8BBD"
+      }
+    ]
+  },
+  "src": "https://cdn.republik.space/s3/republik-assets/dynamic-components/questionnaire/index.js"
+}
+```
+
+<hr /></section>
+
+## Andere Komponente mit choice Fragen:
 
 <section><h6>DYNAMIC_COMPONENT</h6>
 
