@@ -93,13 +93,15 @@ class QuestionTypeChoice extends Component {
             </div>
           </div>
         )}
-        <div {...styles.content}>
-          {!hideAnswers && (userAnswer || userHasSubmitted || showResults) && (
+        {!hideAnswers && (userAnswer || userHasSubmitted || showResults) && (
+          <div {...styles.content}>
             <div {...styles.mobileBorder}>
               <Chart question={question} />
             </div>
-          )}
-          {!userAnswer && !userHasSubmitted && !showResults && (
+          </div>
+        )}
+        {!userAnswer && !userHasSubmitted && !showResults && (
+          <div {...styles.content}>
             <div {...styles.buttons}>
               {options.map((option) => (
                 <div key={`${id}-${option.value}`}>
@@ -109,8 +111,8 @@ class QuestionTypeChoice extends Component {
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     )
   }
