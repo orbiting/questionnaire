@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { css } from 'glamor'
 import uuid from '../lib/uuid'
 
-import { Interaction, Button, mediaQueries } from '@project-r/styleguide'
+import { Interaction, Button, mediaQueries, Label } from '@project-r/styleguide'
 const { P } = Interaction
 
 import { withTranslations } from '../lib/TranslationsContext'
@@ -14,7 +14,7 @@ const styles = {
     margin: '50px 0 10px 0',
   }),
   question: css({
-    margin: '0px 0 10px 0',
+    margin: '0px 0 20px 0',
   }),
   content: css({
     height: 80,
@@ -74,11 +74,28 @@ class QuestionTypeChoice extends Component {
     } = this.props
     const { question } = this.props
     const { userHasSubmitted } = questionnaire
-    console.log(text)
+
+    // if question text contains additional text, the text is separeted by %% signs, it is assumed that the first part of the text is the question
+    const questionTexts = text.split('%%')
+
+    const hasAdditionalText = questionTexts.length > 1
 
     return (
       <div {...styles.container}>
-        <P {...styles.question}>{text}</P>
+        <div {...styles.question}>
+          <P>{questionTexts[0]}</P>
+          <></>
+          {hasAdditionalText &&
+            questionTexts.map((additionalText, idx) => {
+              if (idx > 0) {
+                return (
+                  <P>
+                    <small>{additionalText}</small>
+                  </P>
+                )
+              }
+            })}
+        </div>
         <div {...styles.content}>
           {(userAnswer || userHasSubmitted || showResults) && (
             <div {...styles.mobileBorder}>
