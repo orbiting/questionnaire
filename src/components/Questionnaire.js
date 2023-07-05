@@ -307,19 +307,22 @@ const Questionnaire = (props) => {
                     </A>
                   </div>
                 )}
-                {!hideAnonymize && me && answersSubmitted && !userHasSubmitted && (
-                  <div {...styles.action}>
-                    <A
-                      href='#'
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setShowOverlay(true)
-                      }}
-                    >
-                      {t('questionnaire/anon/intent')}
-                    </A>
-                  </div>
-                )}
+                {!hideAnonymize &&
+                  me &&
+                  answersSubmitted &&
+                  !userHasSubmitted && (
+                    <div {...styles.action}>
+                      <A
+                        href='#'
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setShowOverlay(true)
+                        }}
+                      >
+                        {t('questionnaire/anon/intent')}
+                      </A>
+                    </div>
+                  )}
               </div>
               <P {...styles.footer} style={{ marginTop: 0 }}></P>
               {showOverlay && (

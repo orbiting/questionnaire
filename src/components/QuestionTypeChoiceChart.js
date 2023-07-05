@@ -112,7 +112,8 @@ const labelGauger = createTextGauger(
 
 const QuestionTypeChoiceChart = (props) => {
   const [colorScheme] = useColorContext()
-  const { question, t } = props
+  const { question, t, options } = props
+  console.log(options)
   if (!question || !question.choiceResults) {
     return null
   }
@@ -137,11 +138,11 @@ const QuestionTypeChoiceChart = (props) => {
 
   const truePercentWidth = ((windowWidth - 50) * truePercent) / 100 / 2
   const moveTruePercentLabel =
-    labelGauger('Ja ' + truePercent + '%') + 2 > truePercentWidth
+    labelGauger(options[0].label + truePercent + '%') + 2 > truePercentWidth
 
   const falsePercentWidth = ((windowWidth - 50) * falsePercent) / 100 / 2
   const moveFalsePercentLabel =
-    labelGauger('Nein ' + falsePercent + '%') + 2 > falsePercentWidth
+    labelGauger(options[1].label + falsePercent + '%') + 2 > falsePercentWidth
 
   return (
     <div style={{ width: '100%' }}>
@@ -198,9 +199,7 @@ const QuestionTypeChoiceChart = (props) => {
               }}
             >
               <label {...styles.barLabel}>
-                {t('questionnaire/question/choice/true', {
-                  value: truePercent,
-                })}
+                {options[0].label + ' ' + truePercent + '%'}
               </label>
               {userAnswerTrue && (
                 <CheckCircle
@@ -234,9 +233,7 @@ const QuestionTypeChoiceChart = (props) => {
               }}
             >
               <label {...styles.barLabel}>
-                {t('questionnaire/question/choice/false', {
-                  value: falsePercent,
-                })}
+                {options[1].label + ' ' + falsePercent + '%'}
               </label>
               {userAnswerFalse && (
                 <CheckCircle

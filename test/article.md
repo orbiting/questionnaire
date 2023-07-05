@@ -1,5 +1,5 @@
 ---
-title: "Fragenbogen-Komponente in verschiedenen Ausführungen"
+title: 'Fragenbogen-Komponente in verschiedenen Ausführungen'
 feed: true
 ---
 
@@ -7,7 +7,7 @@ feed: true
 
 # Fragen fragen
 
-## 
+##
 
 Eine Fragebogen-Komponente kann mit Daten aus der query «questionnaire» umgehen und stellt die eigene Antwort im Vergleich zu anderen dar. Sie kann Fragen vom Typ «choice» und «range» darstellen, Antworten an Server schicken und einmal verschickte Daten anonymisieren.
 
@@ -234,7 +234,7 @@ Komponenten rendert alle Fragen:
 {
   "autoHtml": false,
   "props": {
-    "slug": "mss-demokratie",
+    "slug": "mss-russland",
     "colors": [
       {
         "value": true,
